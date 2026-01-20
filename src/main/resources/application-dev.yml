@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://toeic-baotran24092004-0bec.h.aivencloud.com:17496/toeic?sslmode=require
+    username: avnadmin
+    password: AVNS_6dpk6bbQdxxJVLlR717
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug

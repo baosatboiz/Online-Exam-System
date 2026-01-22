@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.entity;
+package com.example.toeicwebsite.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,31 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "question")
+@Table(name = "exam")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionEntity {
+public class ExamEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
-    private QuestionGroupEntity group;
-
-    @Column(name = "question_no", nullable = false)
-    private Integer questionNo;
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String description;
+
+    @Column(name = "duration_minutes", nullable = false)
+    private Integer durationMinutes;
+
+    @Column(name = "total_questions", nullable = false)
+    private Integer totalQuestions;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChoiceEntity> choices = new ArrayList<>();
+    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionGroupEntity> questionGroups = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -40,5 +41,4 @@ public class QuestionEntity {
             createdAt = LocalDateTime.now();
         }
     }
-
 }

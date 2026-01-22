@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.entity;
+package com.example.toeicwebsite.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

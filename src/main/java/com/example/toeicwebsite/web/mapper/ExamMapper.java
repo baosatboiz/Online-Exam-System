@@ -1,25 +1,23 @@
-package com.example.toeicwebsite.service.impl;
+package com.example.toeicwebsite.web.mapper;
 
-import com.example.toeicwebsite.dto.request.ChoiceRequest;
-import com.example.toeicwebsite.dto.request.ExamRequest;
-import com.example.toeicwebsite.dto.request.QuestionGroupRequest;
-import com.example.toeicwebsite.dto.request.QuestionRequest;
-import com.example.toeicwebsite.entity.ChoiceEntity;
-import com.example.toeicwebsite.entity.ExamEntity;
-import com.example.toeicwebsite.entity.QuestionEntity;
-import com.example.toeicwebsite.entity.QuestionGroupEntity;
+import com.example.toeicwebsite.web.dto.request.ChoiceRequest;
+import com.example.toeicwebsite.web.dto.request.ExamRequest;
+import com.example.toeicwebsite.web.dto.request.QuestionGroupRequest;
+import com.example.toeicwebsite.web.dto.request.QuestionRequest;
+import com.example.toeicwebsite.infrastructure.persistence.entity.ChoiceEntity;
+import com.example.toeicwebsite.infrastructure.persistence.entity.ExamEntity;
+import com.example.toeicwebsite.infrastructure.persistence.entity.QuestionEntity;
+import com.example.toeicwebsite.infrastructure.persistence.entity.QuestionGroupEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import com.example.toeicwebsite.repository.ExamRepository;
-import com.example.toeicwebsite.service.ExamService;
+import org.springframework.stereotype.Component;
+import com.example.toeicwebsite.infrastructure.persistence.repository.ExamRepository;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class ExamServiceImpl implements ExamService {
+public class ExamMapper{
 
     private final ExamRepository examRepository;
 
-    @Override
     public void createExam(ExamRequest request) {
         ExamEntity exam = mapExam(request);
 

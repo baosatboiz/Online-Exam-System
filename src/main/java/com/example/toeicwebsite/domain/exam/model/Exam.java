@@ -4,7 +4,9 @@ import com.example.toeicwebsite.domain.exam_attempt.exception.DomainException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Exam {
     private ExamId examId;
@@ -14,13 +16,9 @@ public class Exam {
     private Instant openAt;
     private Instant endAt;
     private ExamMode mode;
-
+    private Map<Integer,Question> questionCache = new HashMap<>();
     public Exam(ExamId examId, List<Part> part, String title,int duration,ExamMode mode) {
-        this.examId = examId;
-        this.part = part;
-        this.title = title;
-        this.duration = duration;
-        this.mode = mode;
+        this(examId,part,title,duration,null,null,mode);
     }
 
     public Exam(ExamId examId, List<Part> part, String title, int duration, Instant openAt, Instant endAt, ExamMode mode) {
@@ -35,21 +33,24 @@ public class Exam {
         this.openAt = openAt;
         this.endAt = endAt;
         this.mode = mode;
+        initializeQuestionCache();
     }
-
+    void initializeQuestionCache(){
+        int count = 1;
+        for(Part p : part) for(QuestionGroup q : p.getQuestionGroups())
+            for(Question question : q.getQuestions()){
+               questionCache.put(count++,question);
+        }
+    }
+    public Map<Integer,Question> getQuestionCache(){ return questionCache;}
     boolean isPractice(){ return mode==ExamMode.PRACTICE;};
     boolean isReal(){ return mode==ExamMode.REAL;};
     public ExamId id(){ return examId;};
     public Question getQuestion(int number) {
-        int count =0;
-        for(Part p:part) for(int i=0;i<p.getQuestions().size();i++){
-            if(count==number-1) {return p.getQuestions().get(i);}
-            count++;
-        }
-        return null;
+        return questionCache.get(number);
     }
     public List<Part> getPart(){ return part;}
-    public int getTotalQuestion(){ return part.stream().flatMap(p->p.getQuestions().stream()).toList().size();};
+    public int getTotalQuestion(){ return questionCache.size();}
     public boolean canStart(Instant now){
         if(isReal()) return !now.isBefore(openAt) && !now.isAfter(endAt);
         return true;
@@ -58,6 +59,6 @@ public class Exam {
         if(mode==ExamMode.PRACTICE){
             return startedAt.plusSeconds(duration);
         }
-        return startedAt.plusSeconds(duration).isBefore(endAt) ? startedAt.plusSeconds(duration) : endAt;
+        return endAt;
     }
 }

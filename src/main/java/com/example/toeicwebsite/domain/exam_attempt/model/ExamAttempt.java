@@ -13,7 +13,7 @@ public class ExamAttempt {
     private Instant mustFinishedAt;
     private Instant finishedAt;
     private ExamStatus status;
-    private Map<Integer, ChoiceKey> answers = new HashMap<>();
+    private Map<Long, ChoiceKey> answers = new HashMap<>();
     private ExamAttempt(ExamAttemptId examAttemptId,Exam exam,Instant startedAt){
         if(!exam.canStart(startedAt)) throw new DomainException("Exam is not open");
         this.examId = exam.id();
@@ -25,13 +25,9 @@ public class ExamAttempt {
     public static ExamAttempt start(ExamAttemptId examAttemptId,Exam exam,Instant now){
        return new ExamAttempt(examAttemptId,exam,now);
     }
-    public void answer(Exam exam,int number,ChoiceKey choiceKey,Instant now){
+    public void answer(Exam exam,Long questionId,ChoiceKey choiceKey,Instant now){
         isInProgress(now);
-        Question question = exam.getQuestion(number);
-        if(question.hasChoice(choiceKey)){
-            answers.put(number,choiceKey);
-        }
-        else throw new DomainException("Invalid choice for the question");
+        answers.put(questionId,choiceKey);
     }
     public void finish(Instant now){
         isInProgress(now);
@@ -43,10 +39,13 @@ public class ExamAttempt {
         int reading =0;
         if(status==ExamStatus.IN_PROGRESS) throw new DomainException("Exam attempt is still in progress");
         for(Part part : exam.getPart()){
-            for(Question question : part.getQuestions()){
-                if(answers.get(question.number())==question.getCorrectChoice().getKey())
-                    if(part.type().isListening()) listening++;
-                    else reading++;
+            for(QuestionGroup questionGroup : part.getQuestionGroups()){
+                for(Question question : questionGroup.getQuestions())
+                    if(answers.get(question.id())!=null&&answers.get(question.id()).equals(question.getCorrectChoice().getKey())){
+                        if(part.type().isListening()) listening++;
+                        else reading++;
+                    };
+
             }
         }
         return new Score(listening,reading);

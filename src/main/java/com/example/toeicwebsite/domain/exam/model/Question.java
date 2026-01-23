@@ -3,16 +3,18 @@ package com.example.toeicwebsite.domain.exam.model;
 import java.util.List;
 
 public class Question {
-    private int number;
+    private Long questionId;
     private String content;
     private List<Choice> choices;
     private String explaination;
+    private Choice correctChoice;
 
-    public Question(int number, String content, List<Choice> choices,String explaination) {
-        this.number = number;
+    public Question(Long questionId,int number, String content, List<Choice> choices,String explaination,Choice correctChoice ) {
+        this.questionId = questionId;
         this.choices = choices;
         this.content = content;
         this.explaination = explaination;
+        this.correctChoice = correctChoice;
     }
     public boolean hasChoice(ChoiceKey choiceKey){
         return choices.stream().anyMatch(choice -> choice.getKey().equals(choiceKey));
@@ -20,9 +22,9 @@ public class Question {
     public String content() {
         return content;
     }
+    public Long id(){ return questionId;}
 
-    public int number(){ return number;}
     public Choice getCorrectChoice(){
-        return choices.stream().filter(Choice::isCorrect).findFirst().orElse(null);
-    }
+        return correctChoice;
+            }
 }

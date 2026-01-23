@@ -4,13 +4,13 @@ import java.util.List;
 
 public class Part {
     private PartType partType;
-    private List<Question> questions;
-    Part(PartType partType, List<Question> questions) {
+    private List<QuestionGroup> questionGroups;
+    Part(PartType partType, List<QuestionGroup> questionGroups) {
         this.partType =  partType;
-        this.questions = questions;
+        this.questionGroups = questionGroups;
     }
     public PartType type(){ return partType; }
-    public List<Question> getQuestions() {
-        return questions;
+    public List<QuestionGroup> getQuestionGroups() {
+        return questionGroups;
     }
 }

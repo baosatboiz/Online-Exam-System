@@ -1,5 +1,6 @@
 package com.example.toeicwebsite.infrastucture.persistence.entity;
 
+import com.example.toeicwebsite.domain.exam.model.ExamMode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,16 @@ public class ExamEntity {
 
     @Column(name = "total_questions", nullable = false)
     private Integer totalQuestions;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ExamMode mode;
+
+    @Column(name = "open_at", nullable = false)
+    private LocalDateTime openAt;
+
+    @Column(name = "end_at", nullable = false)
+    private LocalDateTime endAt;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

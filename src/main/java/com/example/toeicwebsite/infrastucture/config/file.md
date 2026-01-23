@@ -1,0 +1,1 @@
+Config external file path (cdn,audio) for repositoryimpl

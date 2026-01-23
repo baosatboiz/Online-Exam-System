@@ -1,12 +1,12 @@
-package com.example.toeicwebsite.api;
+package com.example.toeicwebsite.web.controller;
 
-import com.example.toeicwebsite.dto.request.ExamRequest;
+import com.example.toeicwebsite.web.dto.request.ExamRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.toeicwebsite.service.ExamService;
+import com.example.toeicwebsite.infrastucture.persistence.import_data.ExamService;
 
 @RestController
 @RequestMapping("/api/exams")

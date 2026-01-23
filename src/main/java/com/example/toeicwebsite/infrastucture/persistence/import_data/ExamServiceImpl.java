@@ -1,17 +1,13 @@
-package com.example.toeicwebsite.service.impl;
+package com.example.toeicwebsite.infrastucture.persistence.import_data;
 
-import com.example.toeicwebsite.dto.request.ChoiceRequest;
-import com.example.toeicwebsite.dto.request.ExamRequest;
-import com.example.toeicwebsite.dto.request.QuestionGroupRequest;
-import com.example.toeicwebsite.dto.request.QuestionRequest;
-import com.example.toeicwebsite.entity.ChoiceEntity;
-import com.example.toeicwebsite.entity.ExamEntity;
-import com.example.toeicwebsite.entity.QuestionEntity;
-import com.example.toeicwebsite.entity.QuestionGroupEntity;
+import com.example.toeicwebsite.web.dto.request.*;
+import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
+import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionEntity;
+import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionGroupEntity;
+import com.example.toeicwebsite.infrastucture.persistence.entity.ChoiceEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.example.toeicwebsite.repository.ExamRepository;
-import com.example.toeicwebsite.service.ExamService;
+import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.ExamRepository;
 
 @Service
 @RequiredArgsConstructor

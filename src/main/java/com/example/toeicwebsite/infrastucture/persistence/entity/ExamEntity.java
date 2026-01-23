@@ -1,6 +1,6 @@
 package com.example.toeicwebsite.infrastucture.persistence.entity;
 
-import com.example.toeicwebsite.domain.exam.model.ExamMode;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import jakarta.persistence.*;
 import lombok.*;
 

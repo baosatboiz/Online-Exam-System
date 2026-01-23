@@ -1,5 +1,7 @@
 package com.example.toeicwebsite.domain.exam.model;
 
+import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+
 import java.util.List;
 
 public class Part {

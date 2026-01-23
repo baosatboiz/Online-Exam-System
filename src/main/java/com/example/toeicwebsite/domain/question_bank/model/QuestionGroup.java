@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.domain.exam.model;
+package com.example.toeicwebsite.domain.question_bank.model;
 
 import java.util.List;
 

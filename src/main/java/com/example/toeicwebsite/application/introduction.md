@@ -1,41 +1,48 @@
 Application Layer Architecture
-Tầng Application đóng vai trò là bộ não điều phối (Orchestrator), kết nối giữa giao diện người dùng (Web) và nghiệp vụ cốt lõi (Domain). Tầng này được thiết kế theo nguyên lý Clean Architecture để đảm bảo tính độc lập và dễ kiểm thử.
+Tầng Application đóng vai trò là bộ não điều phối (Orchestrator), kết nối giữa giao diện người dùng (Web) và nghiệp vụ cốt lõi (Domain). Tầng này được thiết kế theo nguyên lý Clean Architecture và tách biệt giữa các hành động thay đổi trạng thái và truy vấn dữ liệu.
 
-📂 Cấu trúc thư mục (Lean Structure)
+📂 Cấu trúc thư mục (Advanced Lean Structure)
 Plaintext
 
 application/
-├── usecase/    # Input Ports (Interfaces) - Định nghĩa "Cái gì cần làm"
+├── command/    # Command DTOs - Ý định thay đổi trạng thái (Create/Update/Delete)
+├── query/      # Query DTOs - Yêu cầu truy xuất dữ liệu (Read-only)
+├── result/     # Result DTOs (Dữ liệu đầu ra) - Kết quả tinh gọn trả về cho Frontend
 ├── service/    # Application Services (Implementations) - Điều phối thực thi
-├── command/    # Request DTOs (Dữ liệu đầu vào) - Ý định thay đổi trạng thái
-└── dto/        # Response DTOs (Dữ liệu đầu ra) - Kết quả trả về cho Web
+└── usecase/    # Input Ports (Interfaces) - Định nghĩa kịch bản sử dụng (Use Cases)
 🧩 Các thành phần chính
 1. UseCase (Input Ports)
-   Bản chất: Là các Java Interface.
+   Bản chất: Là các Java Interface định nghĩa "Cái gì cần làm".
 
-Vai trò: Định nghĩa ranh giới giữa tầng Web và Application. Tầng Web (Controller) chỉ được biết đến Interface này.
+Vai trò: Định nghĩa ranh giới giữa tầng Web và Application. Tầng Web (Controller) chỉ tương tác với Interface này.
 
-Tác dụng: Giúp Mocking cực nhanh khi Unit Test, tiết kiệm RAM CPU cho IDE.
+Tác dụng: Đảm bảo tính trừu tượng, giúp việc thay đổi logic thực thi hoặc Mocking khi Unit Test trở nên dễ dàng mà không làm ảnh hưởng đến Controller.
 
 2. Service (Implementations)
-   Bản chất: Các Class thực thi Interface UseCase.
+   Bản chất: Các Class thực thi Interface UseCase (thường được đánh dấu @Service trong Spring).
 
-Nhiệm vụ: * Triệu hồi thực thể từ Database thông qua Output Port (Repository Interface).
+Nhiệm vụ:
 
-Gọi các logic nghiệp vụ dày đặc từ Domain Model (ví dụ: calculateScore, isReal).
+Triệu hồi thực thể thông qua Repository Interface.
 
-Thực hiện giao dịch (Transactions).
+Điều phối các logic nghiệp vụ từ các Aggregate Root như Exam, ExamSchedule hay ExamAttempt.
 
-Nguyên tắc: Service phải "mỏng" (Thin Service) – không chứa logic chấm điểm hay tính toán thời gian, toàn bộ logic đó nằm ở Domain.
+Quản lý giao dịch (@Transactional) để đảm bảo tính toàn vẹn dữ liệu.
 
-3. Command (Input Data)
-   Bản chất: Thường dùng Java record để đạt được tính bất biến (Immutable).
+Nguyên tắc: Thin Service – Service chỉ điều phối, không chứa logic chấm điểm hay tính toán thời gian; toàn bộ "chất xám" đó phải nằm ở tầng Domain.
 
-Vai trò: Chứa mọi dữ liệu cần thiết để thực hiện một hành động (ví dụ: examId, questionId, choiceKey).
+3. Command & Query (Input Data Models)
+   Command: Chứa dữ liệu cho các hành động làm thay đổi dữ liệu (ví dụ: StartExamCommand, SubmitAnswerCommand).
 
-Ưu điểm: Loại bỏ boilerplate code (Getter/Setter), cực nhẹ bộ nhớ.
+Query: Chứa các tham số lọc, tìm kiếm để truy xuất dữ liệu (ví dụ: GetExamResultQuery, SearchExamQuery).
 
-4. DTO (Output Data)
-   Bản chất: Các đối tượng vận chuyển dữ liệu trả về cho Frontend.
+Ưu điểm: Tách biệt rõ ràng mục đích của Request, giúp hệ thống dễ mở rộng và bảo trì theo hướng CQRS.
 
-Vai trò: Che giấu các thông tin nhạy cảm của Domain (như đáp án đúng hoặc ID hệ thống không cần thiết).
+4. Result (Output Data Models)
+   Bản chất: Thay thế cho khái niệm DTO truyền thống, tập trung vào kết quả trả về.
+
+Vai trò: Chế biến dữ liệu từ Domain thành định dạng mà Frontend (Next.js) cần.
+
+Bảo mật: Loại bỏ các thông tin nhạy cảm (như đáp án đúng hoặc logic chấm điểm nội bộ) trước khi gửi ra ngoài.
+
+Lưu ý quan trọng: Tầng Application tuyệt đối không được chứa logic nghiệp vụ.

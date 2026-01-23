@@ -1,64 +1,58 @@
-TOEIC Practice Backend Day 1 – Backend Task Assignment
-This document defines Day 1 responsibilities for two backend developers working in parallel.
-General Rules
-•	Branch naming:
-o	be-a/*
-o	be-b/*
-•	No direct commits to main
-•	Keep commits small and focused
-•	Do not modify another developer’s layer without agreement
-________________________________________
-Backend A – Infrastructure, Persistence & Data Seeding Goal: Provide a working database foundation with initial data.
-Responsibilities
-•	Database Migration (Flyway)
-o	Create initial schema: exam, question, choice
-o	Define: primary keys, foreign keys, basic indexes
-•	JPA Persistence Layer
-o	JPA entities under: infrastructure/persistence/jpa/entity
-o	Spring Data JPA repositories under: infrastructure/persistence/jpa/repository
-o	No business logic in entities
-•	Domain Repository Implementations
-o	Implement domain repository interfaces
-o	Handle mapping between domain models and JPA entities
-•	Data Seeding
-o	Insert sample data using Flyway SQL migrations
-o	Seed: at least 1 exam, multiple questions and choices
-o	Purpose:
-	Application starts with usable data
-	Backend can be tested without frontend
-Deliverables
-•	Flyway migration V1 (schema)
-•	Flyway migration V2 (seed data)
-•	JPA entities and repositories
-•	Domain repository implementations
-________________________________________
-Backend B – Domain & Application Layer Goal: Define core business logic and application use cases, independent from database and framework.
-Responsibilities
-•	Domain Model
-o	Create domain packages: domain/exam, domain/question
-o	Define entities and business rules
-o	No JPA or Spring annotations
-•	Domain Repository Interfaces
-o	Define repository contracts in domain layer
-o	Express business intent, not persistence details
-•	Application Use Cases
-o	Create use cases under: application/exam
-o	Examples: GetExamDetail, ListExams
-o	Application layer depends only on domain interfaces
-•	Application DTOs
-o	Request / response models for use cases
-o	No persistence or web annotations
-Deliverables
-•	Domain model compiles standalone
-•	Application layer compiles without infrastructure
-•	Use cases can read seeded data via repositories
-________________________________________
-Coordination Rules
-•	Backend B: * Uses domain repository interfaces only
-o	Does not access JPA or SQL
-•	Backend A: * Controls database schema and data
-o	Does not add business logic
-•	Integration happens after Day 1
+🎯 TOEIC Practice Backend – Day 2 Task Assignment
+This document outlines the parallel development tasks for the MVP, ensuring a clear separation between content infrastructure and the core exam execution flow.
+
+🛠️ Developer A: Content & Setup
+Goal: Ensure the system has "exams to take" and "active windows to enter".
+
+UC 1: CreateExam (Create Exam Template)
+
+Mission: Receive the exam structure (metadata, parts) and persist it into the system.
+
+Output: A complete exam set ready to be linked to a schedule.
+
+UC 2: GetExamDetail (View Exam Details)
+
+Mission: Retrieve the exam structure (number of questions per part, total duration) for the User's preview screen.
+
+Output: Metadata used by the Next.js frontend before the user clicks "Start".
+
+UC 3: CreateExamSchedule (Open Exam Session)
+
+Mission: Attach an ExamId to a specific time window (openAt, endAt) and select the mode (REAL or PRACTICE).
+
+Output: An exam schedule appearing on the student's dashboard.
+
+🚀 Developer B: Flow & Scoring
+Goal: Handle the "heart" of the system—the actual testing experience for the user.
+
+UC 5: StartExamAttempt (Start Exam)
+
+Mission: Validate schedule conditions and initialize the attempt. The primary focus is calculating the mandatory submission time (mustFinishedAt) based on the start time and the schedule's closing gate.
+
+Output: An ExamAttemptId and a real-time countdown for the student.
+
+UC 6: GetAttemptQuestions (Retrieve Questions)
+
+Mission: Retrieve all questions, images, and audio files from the corresponding exam template based on the ExamAttemptId.
+
+Output: A list of questions sorted in correct order (1–200) for the testing interface.
+
+UC 7: SubmitAnswer (Save Answer)
+
+Mission: Save the user's choice (A, B, C, D) incrementally as they are selected, while continuously verifying that the attempt is still within the allowed time.
+
+Output: A "saved" status to ensure a seamless user experience.
+
+UC 8: Finish & GetResult (Submit & Score)
+
+Mission: Terminate the attempt and lock it to prevent further changes. Execute the scoring algorithm to cross-reference answers with the correct keys for Listening and Reading sections.
+
+Output: A detailed score report (correct/incorrect counts) and a total TOEIC score (0–990).
+
+🛠️ Technical Implementation Notes
+Persistence: All data must be persisted in PostgreSQL using Spring Data JPA.
+
+Domain Integrity: Business rules (scoring and time validation) must remain within the Domain Layer and remain independent of the web framework.
 
 Allowed Commit Types
 Type	Description

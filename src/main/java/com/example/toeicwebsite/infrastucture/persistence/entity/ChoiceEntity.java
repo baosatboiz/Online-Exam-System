@@ -1,5 +1,6 @@
 package com.example.toeicwebsite.infrastucture.persistence.entity;
 
+import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +22,9 @@ public class ChoiceEntity {
     @JoinColumn(name = "question_id", nullable = false)
     private QuestionEntity question;
 
-    @Column(nullable = false, length = 1)
-    private String label;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ChoiceKey label;
 
     @Column(columnDefinition = "TEXT")
     private String content;

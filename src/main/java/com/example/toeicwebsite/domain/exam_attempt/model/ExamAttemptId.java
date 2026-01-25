@@ -5,6 +5,9 @@ import java.util.UUID;
 public class ExamAttemptId{
     private UUID id;
 
+    public UUID value() {
+        return id;
+    }
     public ExamAttemptId(UUID id) {
         this.id = id;
     }

@@ -8,6 +8,9 @@ public class ExamId {
     public ExamId(UUID id) {
         this.id = id;
     }
+    public UUID value() {
+        return id;
+    }
     public static ExamId newId(){ return new ExamId(UUID.randomUUID()); }
     @Override
     public boolean equals(Object o) {

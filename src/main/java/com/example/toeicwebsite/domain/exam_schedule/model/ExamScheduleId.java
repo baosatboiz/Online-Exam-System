@@ -8,6 +8,9 @@ public class ExamScheduleId {
     public ExamScheduleId(UUID id) {
         this.id = id;
     }
+    public UUID value() {
+        return id;
+    }
     public static ExamScheduleId newId(){ return new ExamScheduleId(UUID.randomUUID()); }
     @Override
     public boolean equals(Object o) {

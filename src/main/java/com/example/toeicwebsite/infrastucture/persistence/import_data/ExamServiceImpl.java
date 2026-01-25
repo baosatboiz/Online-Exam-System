@@ -7,13 +7,13 @@ import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionGroupEn
 import com.example.toeicwebsite.infrastucture.persistence.entity.ChoiceEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.ExamRepository;
+import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ExamServiceImpl implements ExamService {
 
-    private final ExamRepository examRepository;
+    private final JpaExamRepository examRepository;
 
     @Override
     public void createExam(ExamRequest request) {

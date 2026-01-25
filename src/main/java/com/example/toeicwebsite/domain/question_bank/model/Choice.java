@@ -5,6 +5,12 @@ public class Choice {
     private String content;
     private boolean correct;
 
+    public Choice(ChoiceKey key, String content, boolean correct) {
+        this.key = key;
+        this.content = content;
+        this.correct = correct;
+    }
+
     public ChoiceKey getKey() {
         return key;
     }

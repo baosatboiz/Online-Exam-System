@@ -7,7 +7,7 @@ import java.util.List;
 public class Part {
     private PartType partType;
     private List<QuestionGroup> questionGroups;
-    Part(PartType partType, List<QuestionGroup> questionGroups) {
+    public Part(PartType partType, List<QuestionGroup> questionGroups) {
         this.partType =  partType;
         this.questionGroups = questionGroups;
     }

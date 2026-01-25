@@ -2,11 +2,13 @@ package com.example.toeicwebsite.domain.exam_schedule.model;
 
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.exception.DomainException;
+import lombok.Getter;
 
 import java.time.Instant;
 
 public class ExamSchedule {
     private ExamScheduleId examScheduleId;
+    @Getter
     private ExamId examId;
     private Instant openAt;
     private Instant endAt;
@@ -32,7 +34,7 @@ public class ExamSchedule {
     boolean isReal(){ return mode==ExamMode.REAL;};
     public Instant calculateMustFinishedAt(Instant startedAt, int duration){
         if(mode==ExamMode.PRACTICE){
-            return startedAt.plusSeconds(duration);
+            return startedAt.plusSeconds(duration * 60L);
         }
         return endAt;
     }

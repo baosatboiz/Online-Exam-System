@@ -6,11 +6,13 @@ import com.example.toeicwebsite.domain.exception.DomainException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class ExamAttempt {
     private ExamAttemptId id;
     private ExamScheduleId examScheduleId;
@@ -19,13 +21,28 @@ public class ExamAttempt {
     private Instant finishedAt;
     private ExamStatus status;
     private Map<Long, ChoiceKey> answers = new HashMap<>();
-    private ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Exam exam, Instant startedAt){
+
+    public ExamAttempt() {
+    }
+
+    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Exam exam, Instant startedAt){
         if(!examSchedule.canStart(startedAt)) throw new DomainException("Exam is not open");
         this.examScheduleId = examSchedule.id();
         this.id = examAttemptId;
         this.startedAt = startedAt;
         mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,exam.getDuration());
         this.status = ExamStatus.IN_PROGRESS;
+    }
+    public static ExamAttempt rehydrate(ExamAttemptId id, ExamScheduleId examScheduleId,
+                                        Instant startedAt, Instant mustFinishedAt, Instant finishedAt, ExamStatus status) {
+        ExamAttempt attempt = new ExamAttempt();
+        attempt.id = id;
+        attempt.examScheduleId = examScheduleId;
+        attempt.startedAt = startedAt;
+        attempt.mustFinishedAt = mustFinishedAt;
+        attempt.finishedAt = finishedAt;
+        attempt.status = status;
+        return attempt;
     }
     public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Exam exam,Instant now){
        return new ExamAttempt(examAttemptId,examSchedule,exam,now);

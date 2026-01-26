@@ -1,23 +1,33 @@
 package com.example.toeicwebsite.web.mapper;
 
 import com.example.toeicwebsite.application.result.StartExamAttemptResult;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.web.dto.response.StartExamAttemptResponse;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.time.Duration;
 import java.time.Instant;
 
-@Component
-public class StartExamAttemptResponseMapper {
+@Mapper(componentModel = "spring")
+public interface StartExamAttemptResponseMapper {
 
-    public static StartExamAttemptResponse from(StartExamAttemptResult result) {
-        long remainingSeconds = Duration.between(Instant.now(), result.mustFinishedAt()).getSeconds();
+    @Mapping(target = "attemptId", source = "attemptId")
+    @Mapping(target = "remainingSeconds", expression = "java(remainingSeconds(result, now))")
+    @Mapping(target = "mustFinishedAt", source = "mustFinishedAt")
+    StartExamAttemptResponse toResponse(
+            StartExamAttemptResult result,
+            @Context Instant now
+    );
 
-        return new StartExamAttemptResponse(
-                result.attemptId().value().toString(),
-                remainingSeconds,
-                result.mustFinishedAt()
-        );
+    default String map(ExamAttemptId id) {
+        return id.value().toString();
+    }
+
+    default long remainingSeconds(StartExamAttemptResult result, Instant now) {
+        return Duration.between(now, result.mustFinishedAt()).getSeconds();
     }
 }
+
 

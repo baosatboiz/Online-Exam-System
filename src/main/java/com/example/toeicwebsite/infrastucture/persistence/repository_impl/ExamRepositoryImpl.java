@@ -3,7 +3,7 @@ package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 import com.example.toeicwebsite.domain.exam.model.Exam;
 import com.example.toeicwebsite.domain.exam.repository.ExamRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamRepository;
-import com.example.toeicwebsite.domain.mapper.ExamMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,5 +19,10 @@ public class ExamRepositoryImpl implements ExamRepository {
     @Override
     public Optional<Exam> findByBusinessId(UUID id) {
         return jpaExamRepository.findByBusinessId(id).map(examMapper::toDomain);
+    }
+
+    @Override
+    public Integer findDurationByBusinessId(UUID id) {
+        return jpaExamRepository.findDurationMinutesByBusinessId(id);
     }
 }

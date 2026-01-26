@@ -14,17 +14,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/api/exam-attempts")
 @RequiredArgsConstructor
 public class StartExamAttemptController {
     private final StartExamAttempt startExamAttempt;
+    private final StartExamAttemptResponseMapper startExamAttemptResponseMapper;
+    private final StartExamAttemptWebMapper startExamAttemptWebMapper;
 
     @PostMapping
     public ResponseEntity<StartExamAttemptResponse> startExamAttempt(@RequestBody StartExamAttemptRequest request) {
         String userId = "1";
-        StartExamAttemptCommand command = StartExamAttemptWebMapper.toCommand(request, userId);
+        StartExamAttemptCommand command = startExamAttemptWebMapper.toCommand(request, userId);
         StartExamAttemptResult result = startExamAttempt.execute(command);
-        return ResponseEntity.ok(StartExamAttemptResponseMapper.from(result));
+        return ResponseEntity.ok(startExamAttemptResponseMapper.toResponse(result, Instant.now()));
     }
 }

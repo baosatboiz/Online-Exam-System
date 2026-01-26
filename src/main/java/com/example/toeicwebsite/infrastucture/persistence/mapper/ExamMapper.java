@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.domain.mapper;
+package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam.model.Exam;
 import com.example.toeicwebsite.domain.exam.model.ExamId;

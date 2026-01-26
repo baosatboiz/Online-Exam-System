@@ -3,18 +3,23 @@ package com.example.toeicwebsite.web.mapper;
 import com.example.toeicwebsite.application.command.StartExamAttemptCommand;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.web.dto.request.StartExamAttemptRequest;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class StartExamAttemptWebMapper {
+import java.util.UUID;
 
-    public static StartExamAttemptCommand toCommand(
+@Mapper(componentModel = "spring")
+public interface StartExamAttemptWebMapper {
+
+    @Mapping(target = "examScheduleId", source = "request.examScheduleId")
+    @Mapping(target = "userId", expression = "java(userId)")
+    StartExamAttemptCommand toCommand(
             StartExamAttemptRequest request,
-            String userId
-    ) {
-        return new StartExamAttemptCommand(
-                new ExamScheduleId(request.examScheduleId()),
-                userId
-        );
+            @Context String userId
+    );
+
+    default ExamScheduleId map(UUID id) {
+        return new ExamScheduleId(id);
     }
 }

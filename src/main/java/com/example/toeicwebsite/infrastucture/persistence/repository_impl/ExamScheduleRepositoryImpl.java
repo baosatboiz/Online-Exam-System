@@ -3,7 +3,7 @@ package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
-import com.example.toeicwebsite.domain.mapper.ExamScheduleMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamScheduleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

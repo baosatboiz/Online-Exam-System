@@ -8,7 +8,7 @@ import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEnt
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamAttemptRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
-import com.example.toeicwebsite.domain.mapper.ExamAttemptMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

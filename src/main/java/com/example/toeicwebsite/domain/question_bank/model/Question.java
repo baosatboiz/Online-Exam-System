@@ -12,7 +12,7 @@ public class Question {
     @Getter
     private Choice correctChoice;
 
-    public Question(Long questionId,int number, String content, List<Choice> choices,String explanation) {
+    public Question(Long questionId, String content, List<Choice> choices,String explanation) {
         this.questionId = questionId;
         this.choices = choices;
         this.content = content;

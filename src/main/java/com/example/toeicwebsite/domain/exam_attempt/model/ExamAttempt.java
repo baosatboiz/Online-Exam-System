@@ -7,12 +7,13 @@ import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
+@Getter @Setter
 public class ExamAttempt {
     private ExamAttemptId id;
     private ExamScheduleId examScheduleId;
@@ -25,27 +26,16 @@ public class ExamAttempt {
     public ExamAttempt() {
     }
 
-    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Exam exam, Instant startedAt){
+    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Integer duration, Instant startedAt){
         if(!examSchedule.canStart(startedAt)) throw new DomainException("Exam is not open");
         this.examScheduleId = examSchedule.id();
         this.id = examAttemptId;
         this.startedAt = startedAt;
-        mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,exam.getDuration());
+        mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,duration);
         this.status = ExamStatus.IN_PROGRESS;
     }
-    public static ExamAttempt rehydrate(ExamAttemptId id, ExamScheduleId examScheduleId,
-                                        Instant startedAt, Instant mustFinishedAt, Instant finishedAt, ExamStatus status) {
-        ExamAttempt attempt = new ExamAttempt();
-        attempt.id = id;
-        attempt.examScheduleId = examScheduleId;
-        attempt.startedAt = startedAt;
-        attempt.mustFinishedAt = mustFinishedAt;
-        attempt.finishedAt = finishedAt;
-        attempt.status = status;
-        return attempt;
-    }
-    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Exam exam,Instant now){
-       return new ExamAttempt(examAttemptId,examSchedule,exam,now);
+    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Integer duration,Instant now){
+       return new ExamAttempt(examAttemptId,examSchedule,duration,now);
     }
     public void answer(Exam exam,Long questionId,ChoiceKey choiceKey,Instant now){
         isInProgress(now);

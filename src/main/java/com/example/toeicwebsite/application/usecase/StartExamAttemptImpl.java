@@ -37,10 +37,11 @@ public class StartExamAttemptImpl implements StartExamAttempt {
         }
 
         UUID examBusinessId = examSchedule.getExamId().value();
-        Exam exam = examRepository.findByBusinessId(examBusinessId)
-                .orElseThrow(() -> new DomainException("Exam not found"));
+//        Exam exam = examRepository.findByBusinessId(examBusinessId)
+//                .orElseThrow(() -> new DomainException("Exam not found"));
+        Integer duration = examRepository.findDurationByBusinessId(examBusinessId);
 
-        ExamAttempt examAttempt = new ExamAttempt(ExamAttemptId.newId(), examSchedule, exam, currentTime);
+        ExamAttempt examAttempt = new ExamAttempt(ExamAttemptId.newId(), examSchedule, duration, currentTime);
         ExamAttempt saved = examAttemptRepository.save(examAttempt, command.userId());
         return startExamAttemptResultMapper.from(saved);
     }

@@ -1,10 +1,11 @@
-package com.example.toeicwebsite.domain.mapper;
+package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam.model.Part;
 import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
 import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionGroupEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = QuestionMapper.class)
 public interface QuestionGroupMapper {
+    @Mapping(source = "passageText", target = "passage")
     QuestionGroup toDomain(QuestionGroupEntity entity);
 
     default List<Part> toParts(List<QuestionGroupEntity> entities) {

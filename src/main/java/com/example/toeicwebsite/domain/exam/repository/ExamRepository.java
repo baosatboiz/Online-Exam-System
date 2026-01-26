@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface ExamRepository {
     Optional<Exam> findByBusinessId(UUID id);
+    Integer findDurationByBusinessId(UUID id);
 }

@@ -1,37 +1,50 @@
 package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptEntity;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
-import org.mapstruct.Mapper;
+import org.mapstruct.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface ExamAttemptEntityMapper {
 
-    default ExamAttemptEntity toEntity(ExamAttempt domain,
-                                       ExamScheduleEntity examScheduleEntity,
-                                       String userId) {
-        if (domain == null) return null;
+    @Mappings({
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "businessId", source = "domain.id"),
+            @Mapping(target = "examSchedule", ignore = true),
+            @Mapping(target = "userId", ignore = true),
+            @Mapping(target = "startedAt", source = "domain.startedAt"),
+            @Mapping(target = "mustFinishedAt", source = "domain.mustFinishedAt"),
+            @Mapping(target = "finishedAt", source = "domain.finishedAt"),
+            @Mapping(target = "status", source = "domain.status")
+    })
+    ExamAttemptEntity toEntity(ExamAttempt domain,
+                               @Context ExamScheduleEntity examScheduleEntity,
+                               @Context String userId);
 
-        ExamAttemptEntity entity = new ExamAttemptEntity();
-
-        entity.setBusinessId(domain.getId().value());
-        entity.setUserId(userId);
+    default UUID map(ExamAttemptId examAttemptId) {
+        return examAttemptId.value();
+    }
+    @AfterMapping
+    default void fillExtra(
+            @MappingTarget ExamAttemptEntity entity,
+            @Context ExamScheduleEntity examScheduleEntity,
+            @Context String userId
+    ) {
         entity.setExamSchedule(examScheduleEntity);
-        entity.setStartedAt(toLocal(domain.getStartedAt()));
-        entity.setMustFinishedAt(toLocal(domain.getMustFinishedAt()));
-        entity.setFinishedAt(toLocal(domain.getFinishedAt()));
-        entity.setStatus(domain.getStatus());
-
-        return entity;
+        entity.setUserId(userId);
     }
 
-    private static LocalDateTime toLocal(Instant instant) {
-        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    default LocalDateTime map(Instant instant) {
+        return instant == null ? null
+                : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 }
+
 

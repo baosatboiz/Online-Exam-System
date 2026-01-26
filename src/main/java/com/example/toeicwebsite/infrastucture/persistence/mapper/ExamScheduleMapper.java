@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.domain.mapper;
+package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
@@ -18,9 +18,6 @@ import java.util.UUID;
 public interface ExamScheduleMapper {
     @Mapping(target = "examScheduleId", source = "businessId")
     @Mapping(target = "examId", source = "exam")
-    @Mapping(target = "openAt", source = "openAt")
-    @Mapping(target = "endAt", source = "endAt")
-    @Mapping(target = "mode", source = "mode")
     ExamSchedule toDomain(ExamScheduleEntity entity);
 
     default ExamScheduleId map(UUID businessId) {
@@ -29,9 +26,7 @@ public interface ExamScheduleMapper {
 
     default ExamId map(ExamEntity examEntity) {
         if (examEntity == null) return null;
-        UUID uuid = UUID.nameUUIDFromBytes(
-                ("Exam:" + examEntity.getId()).getBytes(StandardCharsets.UTF_8)
-        );
+        UUID uuid = examEntity.getBusinessId();
         return new ExamId(uuid);
     }
 

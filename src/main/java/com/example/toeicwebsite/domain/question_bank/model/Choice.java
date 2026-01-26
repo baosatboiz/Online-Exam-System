@@ -1,5 +1,11 @@
 package com.example.toeicwebsite.domain.question_bank.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter
+@NoArgsConstructor
 public class Choice {
     private ChoiceKey key;
     private String content;

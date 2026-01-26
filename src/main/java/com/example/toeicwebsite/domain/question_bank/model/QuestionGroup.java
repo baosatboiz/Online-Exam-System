@@ -1,14 +1,19 @@
 package com.example.toeicwebsite.domain.question_bank.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter @Setter
 public class QuestionGroup {
         private Long id;
         private String audioUrl;
         private String passage;
         private String imageUrl;
 
-        private List<Question> questions;
+        private List<Question> questions = new ArrayList<>();
         public List<Question> getQuestions(){
             return questions;
         }

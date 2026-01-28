@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.web.dto.request;
+package com.example.toeicwebsite.web.dto.create_exam.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

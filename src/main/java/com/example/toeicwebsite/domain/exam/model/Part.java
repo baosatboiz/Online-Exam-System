@@ -11,8 +11,12 @@ public class Part {
         this.partType =  partType;
         this.questionGroups = questionGroups;
     }
+    public static Part create(PartType partType, List<QuestionGroup> questionGroups) {
+        return new Part(partType, questionGroups);
+    }
     public PartType type(){ return partType; }
     public List<QuestionGroup> getQuestionGroups() {
         return questionGroups;
     }
+
 }

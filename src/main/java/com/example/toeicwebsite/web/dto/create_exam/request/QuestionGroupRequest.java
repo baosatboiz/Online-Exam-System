@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.web.dto.request;
+package com.example.toeicwebsite.web.dto.create_exam.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -8,8 +8,6 @@ import java.util.List;
 @Data
 public class QuestionGroupRequest {
     private Integer part;
-    @JsonProperty("group_no")
-    private Integer groupNo;
     @JsonProperty("audio_url")
     private String audioUrl;
     @JsonProperty("image_url")

@@ -53,7 +53,7 @@ public class ExamAttempt {
         for(Part part : exam.getPart()){
             for(QuestionGroup questionGroup : part.getQuestionGroups()){
                 for(Question question : questionGroup.getQuestions())
-                    if(answers.get(question.id())!=null&&answers.get(question.id()).equals(question.getCorrectChoice().getKey())){
+                    if(answers.get(question.id())!=null&&answers.get(question.id()).equals(question.getCorrectChoice())){
                         if(part.type().isListening()) listening++;
                         else reading++;
                     };

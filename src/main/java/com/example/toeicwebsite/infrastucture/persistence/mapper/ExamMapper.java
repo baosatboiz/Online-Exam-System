@@ -27,27 +27,42 @@ public interface ExamMapper {
     @Mapping(target = "questionCache", ignore = true)
     Exam toDomain(ExamEntity entity);
 
+    @Mapping(source = "examId",target = "businessId")
+    @Mapping(source = "part",target = "questionGroups")
+    @Mapping(source = "duration",target = "durationMinutes")
+    ExamEntity toEntity(Exam domain);
+
     default ExamId map(UUID businessId) {
         return new ExamId(businessId);
     }
+    default UUID map(ExamId examId) { return examId.value();}
 
     @AfterMapping
-    default void buildQuestionCache(
-            ExamEntity entity,
-            @MappingTarget Exam exam,
-            QuestionMapper questionMapper
-    ) {
-        Map<Integer, Question> cache = new HashMap<>();
-
-        if (entity.getQuestionGroups() != null) {
-            for (QuestionGroupEntity group : entity.getQuestionGroups()) {
-                for (QuestionEntity q : group.getQuestions()) {
-                    cache.put(q.getQuestionNo(), questionMapper.toDomain(q));
-                }
-            }
+    default void afterToEntity(@MappingTarget ExamEntity entity, Exam exam) {
+        for(QuestionGroupEntity q: entity.getQuestionGroups()) {
+            q.setExam(entity);
         }
-
-        exam.setQuestionCache(cache);
     }
+
+//    @AfterMapping
+//    default void buildQuestionCache(
+//            ExamEntity entity,
+//            @MappingTarget Exam exam,
+//            QuestionMapper questionMapper
+//    ) {
+//        Map<Integer, Question> cache = new HashMap<>();
+//
+//        if (entity.getQuestionGroups() != null) {
+//            for (QuestionGroupEntity group : entity.getQuestionGroups()) {
+//                for (QuestionEntity q : group.getQuestions()) {
+//                    cache.put(q.getQuestionNo(), questionMapper.toDomain(q));
+//                }
+//            }
+//        }
+
+//        exam.setQuestionCache(cache);
+//    }
+
+
 }
 

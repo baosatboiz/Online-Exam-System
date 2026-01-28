@@ -1,9 +1,9 @@
-package com.example.toeicwebsite.application.usecase;
+package com.example.toeicwebsite.application.service;
 
 import com.example.toeicwebsite.application.command.StartExamAttemptCommand;
 import com.example.toeicwebsite.application.mapper.StartExamAttemptResultMapper;
 import com.example.toeicwebsite.application.result.StartExamAttemptResult;
-import com.example.toeicwebsite.domain.exam.model.Exam;
+import com.example.toeicwebsite.application.usecase.StartExamAttempt;
 import com.example.toeicwebsite.domain.exam.repository.ExamRepository;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
@@ -32,9 +32,10 @@ public class StartExamAttemptImpl implements StartExamAttempt {
         ExamSchedule examSchedule = examScheduleRepository.findByBusinessId(command.examScheduleId().value())
                 .orElseThrow(() -> new DomainException("Exam schedule not found"));
 
-        if (!examSchedule.canStart(currentTime)) {
-            throw new DomainException("Exam schedule can't start now");
-        }
+// ExamAttempt constructor includes this validation
+//        if (!examSchedule.canStart(currentTime)) {
+//            throw new DomainException("Exam schedule can't start now");
+//        }
 
         UUID examBusinessId = examSchedule.getExamId().value();
 //        Exam exam = examRepository.findByBusinessId(examBusinessId)

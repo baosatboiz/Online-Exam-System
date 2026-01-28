@@ -17,4 +17,15 @@ public class QuestionGroup {
         public List<Question> getQuestions(){
             return questions;
         }
+
+    public QuestionGroup(Long id, String audioUrl, String passage, String imageUrl, List<Question> questions) {
+        this.id = id;
+        this.audioUrl = audioUrl;
+        this.passage = passage;
+        this.imageUrl = imageUrl;
+        this.questions = questions;
+    }
+    public static QuestionGroup create(String audioUrl,String passage,String imageUrl,List<Question> questions){
+            return new QuestionGroup(null,audioUrl,passage,imageUrl,questions);
+    }
 }

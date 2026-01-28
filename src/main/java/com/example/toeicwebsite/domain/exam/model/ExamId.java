@@ -2,6 +2,7 @@ package com.example.toeicwebsite.domain.exam.model;
 
 import java.util.UUID;
 
+
 public class ExamId {
     private UUID id;
 
@@ -19,6 +20,6 @@ public class ExamId {
 
     @Override
     public int hashCode() {
-            return id.hashCode();
+        return id.hashCode();
     }
 }

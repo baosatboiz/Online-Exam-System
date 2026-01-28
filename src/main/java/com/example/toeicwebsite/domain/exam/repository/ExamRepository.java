@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface ExamRepository {
-    Optional<Exam> findByBusinessId(UUID id);
-    Integer findDurationByBusinessId(UUID id);
+        Exam save(Exam exam);
+        Optional<Exam> findByBusinessId(UUID id);
+        Integer findDurationByBusinessId(UUID id);
 }

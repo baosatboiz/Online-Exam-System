@@ -22,9 +22,6 @@ public class QuestionEntity {
     @JoinColumn(name = "group_id", nullable = false)
     private QuestionGroupEntity group;
 
-    @Column(name = "question_no", nullable = false)
-    private Integer questionNo;
-
     @Column(columnDefinition = "TEXT")
     private String content;
 

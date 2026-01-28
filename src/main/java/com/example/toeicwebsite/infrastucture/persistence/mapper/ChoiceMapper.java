@@ -10,4 +10,8 @@ public interface ChoiceMapper {
     @Mapping(source = "isCorrect", target = "correct")
     @Mapping(source = "label", target = "key")
     Choice toDomain(ChoiceEntity entity);
+
+    @Mapping(source ="correct",target = "isCorrect")
+    @Mapping(source = "key",target ="label")
+    ChoiceEntity toEntity(Choice domain);
 }

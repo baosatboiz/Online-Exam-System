@@ -17,27 +17,28 @@ public class Exam {
     @Setter
     private Map<Integer, Question> questionCache = new HashMap<>();
 
-    public Exam(ExamId examId, List<Part> part, String title, int duration, ExamMode mode) {
+    public Exam(ExamId examId, List<Part> part, String title, int duration) {
         this.examId = examId;
         this.part = part;
         this.title = title;
         this.duration = duration;
-//        initializeQuestionCache();
+        initializeQuestionCache();
     }
-//    void initializeQuestionCache(){
-//        int count = 1;
-//        for (Part p : part) {
-//            if (p.getQuestionGroups() == null) continue;
-//
-//            for (QuestionGroup q : p.getQuestionGroups()) {
-//                if (q.getQuestions() == null) continue;
-//
-//                for (Question question : q.getQuestions()) {
-//                    questionCache.put(count++, question);
-//                }
-//            }
-//        }
-//    }
+    public static Exam create(List<Part> part, String title, int duration) {
+        return new Exam(ExamId.newId(),part,title,duration);
+    }
+    void initializeQuestionCache(){
+        int count = 1;
+        for(Part p : part) for(QuestionGroup q : p.getQuestionGroups())
+            for(Question question : q.getQuestions()){
+               questionCache.put(count++,question);
+        }
+    }
+
+    public ExamId getExamId() {
+        return examId;
+    }
+    public String getTitle(){ return title;}
     public Map<Integer,Question> getQuestionCache(){ return questionCache;}
 
     public int getDuration() {return duration;}
@@ -46,5 +47,5 @@ public class Exam {
         return questionCache.get(number);
     }
     public List<Part> getPart(){ return part;}
-    public int getTotalQuestion(){ return questionCache.size();}
+    public int getTotalQuestions(){ return questionCache.size();}
 }

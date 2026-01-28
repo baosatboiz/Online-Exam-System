@@ -1,8 +1,8 @@
-package com.example.toeicwebsite.web.mapper;
+package com.example.toeicwebsite.web.mapper.start_exam;
 
 import com.example.toeicwebsite.application.result.StartExamAttemptResult;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
-import com.example.toeicwebsite.web.dto.response.StartExamAttemptResponse;
+import com.example.toeicwebsite.web.dto.start_exam.response.StartExamAttemptResponse;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -28,8 +28,6 @@ public class QuestionGroupEntity {
     @Column(nullable = false)
     private Integer part;
 
-    @Column(name = "group_no", nullable = false)
-    private Integer groupNo;
 
     @Column(name = "audio_url", columnDefinition = "TEXT")
     private String audioUrl;

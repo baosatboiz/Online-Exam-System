@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.web.dto.request;
+package com.example.toeicwebsite.web.dto.start_exam.request;
 
 import java.util.UUID;
 

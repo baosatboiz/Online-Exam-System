@@ -12,6 +12,9 @@ import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapp
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
@@ -28,5 +31,10 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
         ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userId);
         ExamAttemptEntity saved = jpaExamAttemptRepository.save(examAttemptEntity);
         return examAttemptMapper.toDomain(saved);
+    }
+
+    @Override
+    public Optional<ExamAttempt> findByBusinessId(UUID businessId) {
+        return jpaExamAttemptRepository.findByBusinessId(businessId).map(examAttemptMapper::toDomain);
     }
 }

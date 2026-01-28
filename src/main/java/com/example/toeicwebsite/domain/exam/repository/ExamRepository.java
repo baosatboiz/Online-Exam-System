@@ -6,9 +6,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface ExamRepository {
-        Exam save(Exam exam);
-        Optional<Exam> findByBusinessId(UUID id);
-        Integer findDurationByBusinessId(UUID id);
+    Exam save(Exam exam);
+    Optional<Exam> findByBusinessId(UUID id);
+    Integer findDurationByBusinessId(UUID id);
+    Exam findFullExam(UUID id);
 }

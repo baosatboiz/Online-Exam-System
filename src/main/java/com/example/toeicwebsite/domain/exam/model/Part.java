@@ -1,9 +1,11 @@
 package com.example.toeicwebsite.domain.exam.model;
 
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class Part {
     private PartType partType;
     private List<QuestionGroup> questionGroups;

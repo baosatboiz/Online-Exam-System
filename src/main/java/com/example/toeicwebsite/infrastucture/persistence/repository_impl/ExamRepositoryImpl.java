@@ -29,4 +29,9 @@ public class ExamRepositoryImpl implements ExamRepository {
     public Integer findDurationByBusinessId(UUID id) {
         return jpaExamRepository.findDurationMinutesByBusinessId(id);
     }
+
+    @Override
+    public Exam findFullExam(UUID id) {
+        return examMapper.toDomain(jpaExamRepository.findFullExam(id));
+    }
 }

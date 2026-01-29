@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -30,6 +31,8 @@ public class GetAttemptQuestionsImpl implements GetAttemptQuestions {
     public GetAttemptQuestionsResult handle(GetAttemptQuestionsQuery query) {
         ExamAttempt examAttempt = examAttemptRepository.findByBusinessId(query.examAttemptId().value())
                 .orElseThrow(()-> new IllegalArgumentException("Exam attempt not found"));
+
+        examAttempt.isInProgress(Instant.now());
 
         ExamSchedule examSchedule = examScheduleRepository.findByBusinessId(examAttempt.getExamScheduleId().value())
                 .orElseThrow(()-> new IllegalArgumentException("Exam schedule not found"));

@@ -37,7 +37,7 @@ public class ExamAttempt {
     public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Integer duration,Instant now){
        return new ExamAttempt(examAttemptId,examSchedule,duration,now);
     }
-    public void answer(Exam exam,Long questionId,ChoiceKey choiceKey,Instant now){
+    public void answer(Long questionId,ChoiceKey choiceKey,Instant now){
         isInProgress(now);
         answers.put(questionId,choiceKey);
     }
@@ -68,7 +68,7 @@ public class ExamAttempt {
             finishedAt = now;
         }
     }
-    void isInProgress(Instant now){
+    public void isInProgress(Instant now){
         if(status!=ExamStatus.IN_PROGRESS) throw new DomainException("Attempt already submitted");
         if(now.isAfter(mustFinishedAt)){
             expire(now);

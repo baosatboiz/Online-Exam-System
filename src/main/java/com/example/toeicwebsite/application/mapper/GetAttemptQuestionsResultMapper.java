@@ -9,7 +9,7 @@ import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface GetAttemptQuestionsResultMapper {
 
     @Mapping(source = "part", target = "parts")

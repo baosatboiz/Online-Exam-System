@@ -54,9 +54,13 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
                 .orElseThrow(() -> new DomainException("Exam Attempt not found"));
         QuestionEntity questionEntity = jpaQuestionRepository.findById(question.getQuestionId())
                 .orElseThrow(() -> new DomainException("Question not found"));
-        ExamAttemptAnswerEntity answer = new ExamAttemptAnswerEntity();
-        answer.setExamAttempt(examAttemptEntity);
-        answer.setQuestion(questionEntity);
+        ExamAttemptAnswerEntity answer = jpaExamAttemptAnswerRepository.findByQuestionIdAndExamAttemptId(question.getQuestionId(), examAttemptEntity.getId())
+                .orElse(null);
+        if (answer == null) {
+            answer = new ExamAttemptAnswerEntity();
+            answer.setExamAttempt(examAttemptEntity);
+            answer.setQuestion(questionEntity);
+        }
         answer.setChoiceKey(choiceKey);
         jpaExamAttemptAnswerRepository.save(answer);
     }

@@ -45,5 +45,6 @@ public class QuestionGroupEntity {
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
+    @OrderBy("content ASC")
     private List<QuestionEntity> questions = new ArrayList<>();
 }

@@ -10,6 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public interface QuestionGroupMapper {
 
         // 1️⃣ group theo PartType
         Map<PartType, List<QuestionGroupEntity>> grouped = entities.stream()
-                        .collect(Collectors.groupingBy(e -> PartType.fromCode(e.getPart())));
+                .collect(Collectors.groupingBy(e -> PartType.fromCode(e.getPart())));
 
         // 2️⃣ map từng group -> Part
         return grouped.entrySet().stream()
@@ -42,6 +43,7 @@ public interface QuestionGroupMapper {
 
                     return new Part(partType, questionGroups);
                 })
+                .sorted(Comparator.comparing(Part::type))
                 .toList();
     }
     default List<QuestionGroupEntity> toQGE(List<Part> part){

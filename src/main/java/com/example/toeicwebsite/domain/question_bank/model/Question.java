@@ -9,7 +9,8 @@ public class Question {
     private String content;
     private List<Choice> choices;
     private String explanation;
-    private Choice correctChoice;
+//    private Choice correctChoice;
+    private ChoiceKey correctChoice;
 
     public Question(Long questionId, String content, List<Choice> choices,String explanation) {
         this.questionId = questionId;
@@ -29,10 +30,17 @@ public class Question {
     }
     public Long id(){ return questionId;}
 
-    private Choice findCorrectChoice(List<Choice> choices) {
-        return choices.stream()
-                .filter(Choice::isCorrect)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No correct choice"));
-    }
+//    private Choice findCorrectChoice(List<Choice> choices) {
+//        return choices.stream()
+//                .filter(Choice::isCorrect)
+//                .findFirst()
+//                .orElseThrow(() -> new IllegalStateException("No correct choice"));
+//    }
+private ChoiceKey findCorrectChoice(List<Choice> choices) {
+    return choices.stream()
+            .filter(Choice::isCorrect)
+            .map(Choice::getKey)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No correct choice"));
+}
 }

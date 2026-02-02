@@ -1,5 +1,8 @@
 package com.example.toeicwebsite.domain.exam_attempt.model;
 
+import lombok.Getter;
+
+@Getter
 public class Score {
     private int listening;
     private int reading;

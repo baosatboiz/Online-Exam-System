@@ -14,6 +14,7 @@ import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExam
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaQuestionRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.QuestionMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final JpaExamAttemptAnswerRepository jpaExamAttemptAnswerRepository;
     private final ExamAttemptEntityMapper examAttemptEntityMapper;
     private final ExamAttemptMapper examAttemptMapper;
-    private final QuestionMapper questionMapper;
+    private final ExamAttemptEntityUpdateMapper examAttemptEntityUpdateMapper;
     private final JpaQuestionRepository jpaQuestionRepository;
 
     @Override
@@ -40,6 +41,17 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
                 .orElseThrow(() -> new DomainException("Exam Schedule not found"));
         ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userId);
         ExamAttemptEntity saved = jpaExamAttemptRepository.save(examAttemptEntity);
+        return examAttemptMapper.toDomain(saved);
+    }
+
+    @Override
+    public ExamAttempt update(ExamAttempt examAttempt) {
+        ExamAttemptEntity entity = jpaExamAttemptRepository.findFullByBusinessId(examAttempt.getId().value())
+                .orElseThrow(() -> new DomainException("Exam attempt not found"));
+
+        examAttemptEntityUpdateMapper.updateEntity(examAttempt, entity);
+
+        ExamAttemptEntity saved = jpaExamAttemptRepository.save(entity);
         return examAttemptMapper.toDomain(saved);
     }
 

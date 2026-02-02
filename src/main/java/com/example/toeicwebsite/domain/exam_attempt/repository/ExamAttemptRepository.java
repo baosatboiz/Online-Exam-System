@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface ExamAttemptRepository {
     ExamAttempt save(ExamAttempt examAttempt, String userId);
+    ExamAttempt update(ExamAttempt examAttempt);
     Optional<ExamAttempt> findByBusinessId(UUID businessId);
     void saveAnsweredQuestion(ExamAttempt attempt, Question question, ChoiceKey choiceKey);
 }

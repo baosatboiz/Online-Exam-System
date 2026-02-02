@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -42,4 +44,23 @@ public class ExamAttemptEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ExamStatus status;
+
+    @Column(nullable = false)
+    private Integer listeningScore;
+
+    @Column(nullable = false)
+    private Integer readingScore;
+
+    @OneToMany(mappedBy = "examAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExamAttemptAnswerEntity> answers = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (listeningScore == null) {
+            listeningScore = 0;
+        }
+        if (readingScore == null) {
+            readingScore = 0;
+        }
+    }
 }

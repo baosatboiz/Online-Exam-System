@@ -22,6 +22,7 @@ public class ExamAttempt {
     private Instant finishedAt;
     private ExamStatus status;
     private Map<Long, ChoiceKey> answers = new HashMap<>();
+    private Score score;
 
     public ExamAttempt() {
     }
@@ -46,7 +47,7 @@ public class ExamAttempt {
         finishedAt = now;
         status = ExamStatus.SUBMITTED;
     }
-    public Score calculateScore(Exam exam){
+    public void calculateScore(Exam exam){
         int listening =0;
         int reading =0;
         if(status==ExamStatus.IN_PROGRESS) throw new DomainException("Exam attempt is still in progress");
@@ -60,7 +61,11 @@ public class ExamAttempt {
 
             }
         }
-        return new Score(listening,reading);
+//        return new Score(listening,reading);
+        this.score = new Score(listening, reading);
+    }
+    public void restoreAnswer(Long questionId, ChoiceKey choiceKey) {
+        this.answers.put(questionId, choiceKey);
     }
     public void expire(Instant now){
         if(status == ExamStatus.IN_PROGRESS){

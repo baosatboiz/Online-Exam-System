@@ -35,8 +35,8 @@ public interface ExamAttemptEntityUpdateMapper {
     default void mapScoreToEntity(ExamAttempt domain,
                                   @MappingTarget ExamAttemptEntity entity) {
         if (domain.getScore() != null) {
-            entity.setListeningScore(domain.getScore().getListening());
-            entity.setReadingScore(domain.getScore().getReading());
+            entity.setListeningScore(domain.getScore().getListeningCorrect());
+            entity.setReadingScore(domain.getScore().getReadingCorrect());
         }
     }
 }

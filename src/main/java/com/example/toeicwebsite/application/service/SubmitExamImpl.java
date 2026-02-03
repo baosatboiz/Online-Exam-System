@@ -35,9 +35,11 @@ public class SubmitExamImpl implements SubmitExam {
         examAttempt.calculateScore(exam);
         examAttemptRepository.update(examAttempt);
         return new SubmitExamResult(
-                examAttempt.getScore().getListening(),
-                examAttempt.getScore().getReading(),
-                examAttempt.getScore().getTotalCorrect(),
+                examAttempt.getScore().getListeningCorrect(),
+                examAttempt.getScore().getReadingCorrect(),
+                examAttempt.getScore().totalCorrect(),
+                examAttempt.getScore().totalWrong(),
+                examAttempt.getScore().totalUnanswered(),
                 examAttempt.getStartedAt(),
                 now
         );

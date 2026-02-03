@@ -47,22 +47,37 @@ public class ExamAttempt {
         finishedAt = now;
         status = ExamStatus.SUBMITTED;
     }
-    public void calculateScore(Exam exam){
-        int listening =0;
-        int reading =0;
-        if(status==ExamStatus.IN_PROGRESS) throw new DomainException("Exam attempt is still in progress");
-        for(Part part : exam.getPart()){
-            for(QuestionGroup questionGroup : part.getQuestionGroups()){
-                for(Question question : questionGroup.getQuestions())
-                    if(answers.get(question.id())!=null&&answers.get(question.id()).equals(question.getCorrectChoice())){
-                        if(part.type().isListening()) listening++;
-                        else reading++;
-                    };
+    public void calculateScore(Exam exam) {
+        if (status == ExamStatus.IN_PROGRESS)
+            throw new DomainException("Exam attempt is still in progress");
 
+        int lc = 0, rc = 0;
+        int lw = 0, rw = 0;
+        int lu = 0, ru = 0;
+
+        for (Part part : exam.getPart()) {
+            boolean isListening = part.type().isListening();
+
+            for (QuestionGroup group : part.getQuestionGroups()) {
+                for (Question q : group.getQuestions()) {
+
+                    ChoiceKey answered = answers.get(q.id());
+
+                    if (answered == null) {
+                        if (isListening) lu++;
+                        else ru++;
+                    } else if (answered.equals(q.getCorrectChoice())) {
+                        if (isListening) lc++;
+                        else rc++;
+                    } else {
+                        if (isListening) lw++;
+                        else rw++;
+                    }
+                }
             }
         }
-//        return new Score(listening,reading);
-        this.score = new Score(listening, reading);
+
+        this.score = new Score(lc, rc, lw, rw, lu, ru);
     }
     public void restoreAnswer(Long questionId, ChoiceKey choiceKey) {
         this.answers.put(questionId, choiceKey);

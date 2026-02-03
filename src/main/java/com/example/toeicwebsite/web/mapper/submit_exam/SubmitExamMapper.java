@@ -10,19 +10,23 @@ public interface SubmitExamMapper {
 
     @Mapping(
             target = "listeningScore",
-            expression = "java(ToeicScoreConverter.listeningScore(result.listeningScore()))"
+            expression = "java(ToeicScoreConverter.listeningScore(result.listeningCorrect()))"
     )
     @Mapping(
             target = "readingScore",
-            expression = "java(ToeicScoreConverter.readingScore(result.readingScore()))"
+            expression = "java(ToeicScoreConverter.readingScore(result.readingCorrect()))"
     )
     @Mapping(
             target = "totalScore",
             expression = "java("
-                    + "ToeicScoreConverter.listeningScore(result.listeningScore())"
+                    + "ToeicScoreConverter.listeningScore(result.listeningCorrect())"
                     + " + "
-                    + "ToeicScoreConverter.readingScore(result.readingScore())"
+                    + "ToeicScoreConverter.readingScore(result.readingCorrect())"
                     + ")"
+    )
+    @Mapping(
+            target = "totalCorrect",
+            expression = "java(result.listeningCorrect() + result.readingCorrect())"
     )
     @Mapping(target = "totalTimeSeconds", source = "totalTimeSeconds")
     @Mapping(target = "finishedAt", source = "result.finishedAt")

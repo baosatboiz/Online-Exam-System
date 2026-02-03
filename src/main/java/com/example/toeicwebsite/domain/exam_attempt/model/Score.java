@@ -4,11 +4,43 @@ import lombok.Getter;
 
 @Getter
 public class Score {
-    private int listening;
-    private int reading;
-    public Score(int listening, int reading) {
-        this.listening =  listening;
-        this.reading = reading;
+    private int listeningCorrect;
+    private int readingCorrect;
+    private int listeningWrong = 0;
+    private int readingWrong = 0;
+    private int listeningUnanswered = 0;
+    private int readingUnanswered = 0;
+
+    public Score(int listeningCorrect, int readingCorrect) {
+        this.listeningCorrect = listeningCorrect;
+        this.readingCorrect = readingCorrect;
     }
-    public int getTotalCorrect(){ return listening+reading;}
+
+    public Score(
+            int listeningCorrect,
+            int readingCorrect,
+            int listeningWrong,
+            int readingWrong,
+            int listeningUnanswered,
+            int readingUnanswered
+    ) {
+        this.listeningCorrect = listeningCorrect;
+        this.readingCorrect = readingCorrect;
+        this.listeningWrong = listeningWrong;
+        this.readingWrong = readingWrong;
+        this.listeningUnanswered = listeningUnanswered;
+        this.readingUnanswered = readingUnanswered;
+    }
+
+    public int totalCorrect() {
+        return listeningCorrect + readingCorrect;
+    }
+
+    public int totalWrong() {
+        return listeningWrong + readingWrong;
+    }
+
+    public int totalUnanswered() {
+        return listeningUnanswered + readingUnanswered;
+    }
 }

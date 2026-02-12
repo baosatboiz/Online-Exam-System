@@ -1,7 +1,9 @@
 package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exception.DomainException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
@@ -17,11 +19,15 @@ import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEnti
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.QuestionMapper;
+import com.example.toeicwebsite.infrastucture.persistence.projection.TotalAttemtpProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -75,5 +81,24 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
         }
         answer.setChoiceKey(choiceKey);
         jpaExamAttemptAnswerRepository.save(answer);
+    }
+
+    @Override
+    public Map<ExamScheduleId, Long> countTotalAttemptsIn(List<ExamScheduleId> ids) {
+        List<UUID> scheduleIds = ids.stream().map(ExamScheduleId::value).toList();
+        return jpaExamAttemptRepository.countTotalAttemptsIn(scheduleIds)
+                .stream()
+                .collect(Collectors.toMap(p->new ExamScheduleId(p.getExamScheduleId()), TotalAttemtpProjection::getTotal));
+    }
+
+    @Override
+    public Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(String userId, List<ExamScheduleId> ids) {
+        List<UUID> scheduleIds = ids.stream().map(ExamScheduleId::value).toList();
+        return jpaExamAttemptRepository.findByUserIdAndExamScheduleIdsIn(userId,scheduleIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        e-> new ExamScheduleId(e.getExamSchedule().getBusinessId()),
+                                ExamAttemptEntity::getStatus,
+                        (existing,replacement)->replacement));
     }
 }

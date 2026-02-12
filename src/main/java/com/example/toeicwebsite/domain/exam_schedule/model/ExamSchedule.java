@@ -5,10 +5,9 @@ import com.example.toeicwebsite.domain.exception.DomainException;
 import lombok.Getter;
 
 import java.time.Instant;
-
+@Getter
 public class ExamSchedule {
     private ExamScheduleId examScheduleId;
-    @Getter
     private ExamId examId;
     private Instant openAt;
     private Instant endAt;

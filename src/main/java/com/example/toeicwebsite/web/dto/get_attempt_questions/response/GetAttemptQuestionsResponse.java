@@ -23,6 +23,7 @@ public record GetAttemptQuestionsResponse(
     ) {}
 
     public record QuestionResponse(
+            Long questionId,
             String content,
             List<ChoiceResponse> choices
     ) {}

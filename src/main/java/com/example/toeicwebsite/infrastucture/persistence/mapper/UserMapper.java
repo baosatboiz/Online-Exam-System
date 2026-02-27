@@ -15,8 +15,17 @@ public interface UserMapper {
     @Mapping(source = "bussinessId",target = "userId")
     @Mapping(source = "role",target="userRole")
     User toDomain(UserEntity user);
+    @Mapping(source = "userId",target = "bussinessId")
+    @Mapping(source = "userRole",target = "role")
+    UserEntity toEntity(User user);
     default UserId map(UUID id) {
         return new UserId(id);
+    }
+    default UUID map(UserId userId) {
+        return userId.value();
+    }
+    default String map(Role role){
+        return role.name();
     }
     default Role map(String role){
         try{

@@ -18,6 +18,9 @@ public class User {
         this.password = Objects.requireNonNull(password,"Password cannot be null");
         this.userRole = userRole;
     }
+    public static User register(String email,String password,List<Role> userRole) {
+        return new User(UserId.newId(),email,password,userRole);
+    }
     public void changePassword(String encodedPassword) {
         this.password = Objects.requireNonNull(encodedPassword,"Password cannot be null");
     }

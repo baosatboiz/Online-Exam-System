@@ -9,7 +9,7 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
-import com.example.toeicwebsite.domain.exception.DomainException;
+import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +26,11 @@ public class SubmitExamImpl implements SubmitExam {
     @Override
     public SubmitExamResult execute(SubmitExamCommand command) {
         ExamAttempt examAttempt = examAttemptRepository.findByBusinessId(command.examAttemptId().value())
-                .orElseThrow(() -> new DomainException("Exam Attempt not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam Attempt not found"));
         Instant now = Instant.now();
         examAttempt.finish(now);
         ExamSchedule examSchedule = examScheduleRepository.findByBusinessId(examAttempt.getExamScheduleId().value())
-                .orElseThrow(() -> new DomainException("Exam Schedule not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam Schedule not found"));
         Exam exam = examRepository.findFullExam(examSchedule.getExamId().value());
         examAttempt.calculateScore(exam);
         examAttemptRepository.update(examAttempt);

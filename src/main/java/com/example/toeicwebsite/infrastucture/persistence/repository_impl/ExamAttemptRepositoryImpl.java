@@ -4,7 +4,7 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
-import com.example.toeicwebsite.domain.exception.DomainException;
+import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptAnswerEntity;
@@ -18,7 +18,6 @@ import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaQues
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
-import com.example.toeicwebsite.infrastucture.persistence.mapper.QuestionMapper;
 import com.example.toeicwebsite.infrastucture.persistence.projection.TotalAttemtpProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -44,7 +43,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     @Override
     public ExamAttempt save(ExamAttempt examAttempt, String userId) {
         ExamScheduleEntity examScheduleEntity = jpaExamScheduleRepository.findByBusinessId(examAttempt.getExamScheduleId().value())
-                .orElseThrow(() -> new DomainException("Exam Schedule not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam Schedule not found"));
         ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userId);
         ExamAttemptEntity saved = jpaExamAttemptRepository.save(examAttemptEntity);
         return examAttemptMapper.toDomain(saved);
@@ -53,7 +52,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     @Override
     public ExamAttempt update(ExamAttempt examAttempt) {
         ExamAttemptEntity entity = jpaExamAttemptRepository.findFullByBusinessId(examAttempt.getId().value())
-                .orElseThrow(() -> new DomainException("Exam attempt not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam attempt not found"));
 
         examAttemptEntityUpdateMapper.updateEntity(examAttempt, entity);
 
@@ -69,9 +68,9 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     @Override
     public void saveAnsweredQuestion(ExamAttempt examAttempt, Question question, ChoiceKey choiceKey) {
         ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttempt.getId().value())
-                .orElseThrow(() -> new DomainException("Exam Attempt not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam Attempt not found"));
         QuestionEntity questionEntity = jpaQuestionRepository.findById(question.getQuestionId())
-                .orElseThrow(() -> new DomainException("Question not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Question not found"));
         ExamAttemptAnswerEntity answer = jpaExamAttemptAnswerRepository.findByQuestionIdAndExamAttemptId(question.getQuestionId(), examAttemptEntity.getId())
                 .orElse(null);
         if (answer == null) {

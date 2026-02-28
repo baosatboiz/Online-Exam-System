@@ -2,7 +2,7 @@ package com.example.toeicwebsite.domain.exam_attempt.model;
 import com.example.toeicwebsite.domain.exam.model.*;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
-import com.example.toeicwebsite.domain.exception.DomainException;
+import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
@@ -28,7 +28,7 @@ public class ExamAttempt {
     }
 
     public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Integer duration, Instant startedAt){
-        if(!examSchedule.canStart(startedAt)) throw new DomainException("Exam is not open");
+        if(!examSchedule.canStart(startedAt)) throw new BusinessRuleException("Exam is not open");
         this.examScheduleId = examSchedule.id();
         this.id = examAttemptId;
         this.startedAt = startedAt;
@@ -49,7 +49,7 @@ public class ExamAttempt {
     }
     public void calculateScore(Exam exam) {
         if (status == ExamStatus.IN_PROGRESS)
-            throw new DomainException("Exam attempt is still in progress");
+            throw new BusinessRuleException("Exam attempt is still in progress");
 
         int lc = 0, rc = 0;
         int lw = 0, rw = 0;
@@ -89,10 +89,10 @@ public class ExamAttempt {
         }
     }
     public void isInProgress(Instant now){
-        if(status!=ExamStatus.IN_PROGRESS) throw new DomainException("Attempt already submitted");
+        if(status!=ExamStatus.IN_PROGRESS) throw new BusinessRuleException("Attempt already submitted");
         if(now.isAfter(mustFinishedAt)){
             expire(now);
-            throw new DomainException("Attempt has expired");
+            throw new BusinessRuleException("Attempt has expired");
         }
     }
 }

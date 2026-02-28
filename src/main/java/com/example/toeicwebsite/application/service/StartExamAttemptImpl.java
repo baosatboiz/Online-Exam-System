@@ -10,7 +10,7 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
-import com.example.toeicwebsite.domain.exception.DomainException;
+import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ public class StartExamAttemptImpl implements StartExamAttempt {
     public StartExamAttemptResult execute(StartExamAttemptCommand command) {
         Instant currentTime = Instant.now();
         ExamSchedule examSchedule = examScheduleRepository.findByBusinessId(command.examScheduleId().value())
-                .orElseThrow(() -> new DomainException("Exam schedule not found"));
+                .orElseThrow(() -> new DomainNotFoundException("Exam schedule not found"));
 
 // ExamAttempt constructor includes this validation
 //        if (!examSchedule.canStart(currentTime)) {

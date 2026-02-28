@@ -1,7 +1,7 @@
 package com.example.toeicwebsite.domain.exam_schedule.model;
 
 import com.example.toeicwebsite.domain.exam.model.ExamId;
-import com.example.toeicwebsite.domain.exception.DomainException;
+import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -15,7 +15,7 @@ public class ExamSchedule {
 
     public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode) {
         if(mode==ExamMode.REAL){
-            if(openAt==null || endAt==null||openAt.isAfter(endAt)) throw new DomainException("Invalid time schedule");
+            if(openAt==null || endAt==null||openAt.isAfter(endAt)) throw new BusinessRuleException("Invalid time schedule");
         }
         this.examScheduleId = examScheduleId;
         this.examId = examId;

@@ -32,7 +32,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/exam-attempts")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:8080"})
 @RequiredArgsConstructor
 public class StartExamAttemptController {
     private final StartExamAttempt startExamAttempt;

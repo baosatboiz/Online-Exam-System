@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/exam-schedule")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:8080"})
 @RequiredArgsConstructor
 public class ExamScheduleController {
     private final GetScheduleMapper getScheduleMapper;

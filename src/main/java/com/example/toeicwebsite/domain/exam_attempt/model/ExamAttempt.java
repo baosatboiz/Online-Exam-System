@@ -1,0 +1,98 @@
+package com.example.toeicwebsite.domain.exam_attempt.model;
+import com.example.toeicwebsite.domain.exam.model.*;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
+import com.example.toeicwebsite.domain.exception.BusinessRuleException;
+import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
+import com.example.toeicwebsite.domain.question_bank.model.Question;
+import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter @Setter
+public class ExamAttempt {
+    private ExamAttemptId id;
+    private ExamScheduleId examScheduleId;
+    private Instant startedAt;
+    private Instant mustFinishedAt;
+    private Instant finishedAt;
+    private ExamStatus status;
+    private Map<Long, ChoiceKey> answers = new HashMap<>();
+    private Score score;
+
+    public ExamAttempt() {
+    }
+
+    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Integer duration, Instant startedAt){
+        if(!examSchedule.canStart(startedAt)) throw new BusinessRuleException("Exam is not open");
+        this.examScheduleId = examSchedule.id();
+        this.id = examAttemptId;
+        this.startedAt = startedAt;
+        mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,duration);
+        this.status = ExamStatus.IN_PROGRESS;
+    }
+    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Integer duration,Instant now){
+       return new ExamAttempt(examAttemptId,examSchedule,duration,now);
+    }
+    public void answer(Long questionId,ChoiceKey choiceKey,Instant now){
+        isInProgress(now);
+        answers.put(questionId,choiceKey);
+    }
+    public void finish(Instant now){
+        isInProgress(now);
+        finishedAt = now;
+        status = ExamStatus.SUBMITTED;
+    }
+    public void calculateScore(Exam exam) {
+        if (status == ExamStatus.IN_PROGRESS)
+            throw new BusinessRuleException("Exam attempt is still in progress");
+
+        int lc = 0, rc = 0;
+        int lw = 0, rw = 0;
+        int lu = 0, ru = 0;
+
+        for (Part part : exam.getPart()) {
+            boolean isListening = part.type().isListening();
+
+            for (QuestionGroup group : part.getQuestionGroups()) {
+                for (Question q : group.getQuestions()) {
+
+                    ChoiceKey answered = answers.get(q.id());
+
+                    if (answered == null) {
+                        if (isListening) lu++;
+                        else ru++;
+                    } else if (answered.equals(q.getCorrectChoice())) {
+                        if (isListening) lc++;
+                        else rc++;
+                    } else {
+                        if (isListening) lw++;
+                        else rw++;
+                    }
+                }
+            }
+        }
+
+        this.score = new Score(lc, rc, lw, rw, lu, ru);
+    }
+    public void restoreAnswer(Long questionId, ChoiceKey choiceKey) {
+        this.answers.put(questionId, choiceKey);
+    }
+    public void expire(Instant now){
+        if(status == ExamStatus.IN_PROGRESS){
+            status=ExamStatus.EXPIRED;
+            finishedAt = now;
+        }
+    }
+    public void isInProgress(Instant now){
+        if(status!=ExamStatus.IN_PROGRESS) throw new BusinessRuleException("Attempt already submitted");
+        if(now.isAfter(mustFinishedAt)){
+            expire(now);
+            throw new BusinessRuleException("Attempt has expired");
+        }
+    }
+}

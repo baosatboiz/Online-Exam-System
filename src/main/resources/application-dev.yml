@@ -3,6 +3,9 @@ spring:
     url: jdbc:postgresql://toeic-baotran24092004-0bec.h.aivencloud.com:17496/toeic?sslmode=require
     username: avnadmin
     password: AVNS_6dpk6bbQdxxJVLlR717
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
 
   jpa:
     hibernate:
@@ -15,3 +18,4 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.security: debug

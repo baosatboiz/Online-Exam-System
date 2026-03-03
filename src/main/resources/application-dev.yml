@@ -15,6 +15,17 @@ spring:
   flyway:
     enabled: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 261892871681-pf7dj933v8jjat676lp8snl0ahgfjfmg.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+
 logging:
   level:
     org.hibernate.SQL: debug

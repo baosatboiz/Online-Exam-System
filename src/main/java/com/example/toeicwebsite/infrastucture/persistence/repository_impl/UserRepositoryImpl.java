@@ -7,6 +7,9 @@ import com.example.toeicwebsite.infrastucture.persistence.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
@@ -20,6 +23,11 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User save(User newUser) {
         return userMapper.toDomain(jpaUserRepository.save(userMapper.toEntity(newUser)));
+    }
+
+    @Override
+    public User findByBusinessId(UUID id) {
+        return userMapper.toDomain(jpaUserRepository.findByBussinessId(id).orElse(null));
     }
 
 }

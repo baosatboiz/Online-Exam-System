@@ -1,0 +1,27 @@
+.pro{
+background: linear-gradient(180deg, #f5de35, #d65309);
+}
+.free{
+    background : linear-gradient(0deg,#496bdd,#01a2ff81)
+}
+.badge-shimmer {
+    position:relative;
+    overflow: hidden;
+}
+
+.badge-shimmer::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: rotate(30deg);
+    animation: shimmer-logic 3s infinite;
+}
+
+@keyframes shimmer-logic {
+    0% { left: -10%; }
+    100% { left: 110%; }
+}

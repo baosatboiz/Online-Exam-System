@@ -1,0 +1,15 @@
+.choice-btn:hover:not(.active){
+    transform: scale(0.98);
+    border: 1px solid #0d6efd;
+    background-color: #ffffff !important;
+}
+.choice-btn{
+    transition: all 0.4s ease;
+}
+.choice-btn:active{
+    transform:scale(0.98);
+    transition: transform 0.1s;
+}
+.choice-btn.active{
+    transform:scale(0.98);
+}

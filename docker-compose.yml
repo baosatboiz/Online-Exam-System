@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+     - oes-network
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile
+    networks:
+     - oes-network
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+networks:
+  oes-network:
+    driver: bridge

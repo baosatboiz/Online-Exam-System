@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**", "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2

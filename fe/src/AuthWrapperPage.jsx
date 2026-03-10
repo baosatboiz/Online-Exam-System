@@ -7,11 +7,9 @@ import Register from "./Register";
   const [isLogin,setIsLogin] = useState(true);
   return (
     <div className={`form-wrap ${isLogin?'':'register'}`}>
-        <AuthProvider>
         {isLogin?
             <LoginForm setIsLogin={setIsLogin}></LoginForm>
             :<Register  setIsLogin={setIsLogin}/>}
-        </AuthProvider>
   </div>
   )
 }

@@ -2,6 +2,7 @@ package com.example.toeicwebsite.domain.user.repository;
 
 import com.example.toeicwebsite.domain.user.model.User;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository {

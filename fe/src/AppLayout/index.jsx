@@ -5,7 +5,7 @@ import { TimeProvider } from "../TimeProvider";
 
 export default function AppLayout(){
     return (
-        <div>
+        <div className="min-vh-100 bg-light">
             <TimeProvider>
             <div><ExamHeader/></div>
             </TimeProvider>

@@ -6,10 +6,12 @@ import ExamPageWrapper from './ExamPageWrapper.jsx'
 import Home from './Home/index.jsx';
 import AuthWrapperPage from './AuthWrapperPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx'
+import { AuthProvider } from './AuthProvider.jsx';
 function App() {
   return (
     <div className="">
       <Router>
+        <AuthProvider>
         <Routes>
       <Route path="/auth" element={<AuthWrapperPage/>}></Route>
       <Route element={<ProtectedRoute/>}>
@@ -18,6 +20,7 @@ function App() {
         <Route path="/result/:attemptId" element={<ResultPage/>}></Route>
       </Route>
       </Routes>
+      </AuthProvider>
       </Router>
     </div>
   )

@@ -4,7 +4,7 @@ import fetchData from "./fetch/fetchData";
 import { ExamStaticProvider } from "./ExamStaticProvider";
 import { ExamDynamicProvider } from "./ExamDynamicProvider";
 import AppLayout from "./AppLayout";
-
+import LoadingPage from "./Loading/LoadingPage.jsx";
 export default function ExamPageWrapper(){
     const {attemptId} = useParams();
     const [exam,setExam] = useState({});
@@ -15,7 +15,7 @@ export default function ExamPageWrapper(){
         .catch(err=>console.log(err))
         
     },[attemptId])
-    if(loading) return <div className="d-flex align-items-center justify-content-center h-100">Loading</div>
+    if(loading) return <LoadingPage></LoadingPage>
     return(
         <ExamStaticProvider exam={exam}>
             <ExamDynamicProvider attemptId={attemptId}>

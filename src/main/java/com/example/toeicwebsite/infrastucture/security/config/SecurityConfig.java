@@ -2,6 +2,7 @@ package com.example.toeicwebsite.infrastucture.security.config;
 
 import com.example.toeicwebsite.infrastucture.security.oauth2.OAuth2SuccessHandler;
 import com.example.toeicwebsite.infrastucture.security.oauth2.OAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,9 +31,21 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**", "/api/**").permitAll()
+                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(e->{
+                    e.authenticationEntryPoint((request,response,authException)->{
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        String message = "{" +
+                                "\"status\": 401," +
+                                "\"message\":Unauthorized}";
+                        response.getWriter().write(message);
+                    });
+                })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(ui -> ui.userService(oAuth2UserService))

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ExamSchedule from '../ExamSchedule/index.jsx'
 import fetchData from '../fetch/fetchData.js';
+import LoadingPage from '../Loading/LoadingPage.jsx';
 export default function Home(){
     const [schedule,setSchedule] = useState([]);
     const [loading,setLoading] = useState(true);
@@ -9,7 +10,7 @@ export default function Home(){
             .then(data=>{setSchedule(data); setLoading(false);console.log(data);})
             .catch(error=>console.log(error))
     },[])
-    if(loading) return <div className="d-flex align-items-center justify-content-center h-100">Loading</div>
+    if(loading) return <LoadingPage></LoadingPage>
     return (
     <div className="min-vh-100 bg-light">
     <div className="container py-3">

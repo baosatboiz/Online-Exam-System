@@ -6,6 +6,7 @@ import com.example.toeicwebsite.application.usecase.GetMyProfile;
 import com.example.toeicwebsite.application.usecase.Login;
 import com.example.toeicwebsite.application.usecase.Register;
 import com.example.toeicwebsite.infrastucture.security.config.SecurityUser;
+import com.example.toeicwebsite.infrastucture.security.oauth2.OAuth2UserPrincipal;
 import com.example.toeicwebsite.web.dto.login.GetMyProfileResponse;
 import com.example.toeicwebsite.web.dto.login.LoginRequest;
 import com.example.toeicwebsite.web.dto.login.LoginResponse;
@@ -49,7 +50,9 @@ public class AuthController {
             return ResponseEntity.ok(mapper.toResponse(register.handle(mapper.toCommand(request))));
     }
     @GetMapping("/me")
-    public ResponseEntity<?> getMe(@AuthenticationPrincipal(expression = "username") String email){
-        return ResponseEntity.ok(mapper.toResponse(getMyProfile.execute(new GetMyProfileQuery(email))));
+    public ResponseEntity<?> getMe(@AuthenticationPrincipal SecurityUser user){
+       GetMyProfileResponse response = mapper.toResponse(getMyProfile.execute(new GetMyProfileQuery(user.getUsername())));
+       response.setPicture(user.getPicture());
+       return ResponseEntity.ok(response);
     }
 }

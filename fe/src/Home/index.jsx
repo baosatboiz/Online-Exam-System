@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ExamSchedule from '../ExamSchedule/index.jsx'
 import fetchData from '../fetch/fetchData.js';
 import LoadingPage from '../Loading/LoadingPage.jsx';
+import NavBar from '../NavBar/index.jsx';
 export default function Home(){
     const [schedule,setSchedule] = useState([]);
     const [loading,setLoading] = useState(true);
@@ -13,6 +14,7 @@ export default function Home(){
     if(loading) return <LoadingPage></LoadingPage>
     return (
     <div className="min-vh-100 bg-light">
+     <NavBar></NavBar>
     <div className="container py-3">
           <h2 className="fw-bold text-center">Danh sách bài thi</h2>
            <div className="d-flex justify-content-center flex-wrap">
@@ -21,6 +23,7 @@ export default function Home(){
              )}
              </div>
        </div>
+       
   </div>
 )
 }

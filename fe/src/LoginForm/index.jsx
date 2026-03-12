@@ -15,6 +15,7 @@ export default function LoginForm({setIsLogin}) {
       body: JSON.stringify({email,password})
     });
     const user = await fetchData('/me');
+    console.log(user);
     login(user);
   }
   if(user) return <Navigate to="/" replace></Navigate>

@@ -46,7 +46,7 @@ public class OAuth2LoginImpl implements OAuth2Login {
             userProviderRepository.save(newProvider);
         }
 
-        String token = authPort.generateToken(user.getEmail(), user.getUserRole());
+        String token = authPort.generateToken(user.getEmail(), user.getUserRole(),command.picture());
         return new OAuth2LoginResult(
                 user.getEmail(),
                 token,

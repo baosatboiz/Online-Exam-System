@@ -25,6 +25,16 @@ public class JwtUtils {
                 .signWith(getSecretKey())
                 .compact();
     }
+    public String generateToken(String email, List<String> role,String picture){
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role",role)
+                .claim("picture",picture)
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(Date.from(Instant.now().plusSeconds(3600)))
+                .signWith(getSecretKey())
+                .compact();
+    }
     public Claims parseToken(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(getSecretKey())

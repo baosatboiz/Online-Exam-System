@@ -12,6 +12,7 @@ export function AuthProvider({children}){
        const handle = async()=>{
        try{
         const user = await fetchData('/me');
+        console.log(user);
         login(user);}
        catch(e){logout();}
        finally{setLoading(false);}

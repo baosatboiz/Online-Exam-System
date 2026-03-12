@@ -27,8 +27,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         String provider = request.getClientRegistration().getRegistrationId().toUpperCase();
         String providerId = (String) attrs.get("sub");
         String email = (String) attrs.get("email");
+        String picture = (String)attrs.get("picture");
 
-        OAuth2LoginCommand command = new OAuth2LoginCommand(email, providerId, Provider.valueOf(provider));
+        OAuth2LoginCommand command = new OAuth2LoginCommand(email, picture,providerId, Provider.valueOf(provider));
         OAuth2LoginResult result  = oAuth2Login.execute(command);
 
         return new OAuth2UserPrincipal(result, attrs);

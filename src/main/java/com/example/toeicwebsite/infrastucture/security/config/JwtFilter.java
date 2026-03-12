@@ -2,6 +2,7 @@ package com.example.toeicwebsite.infrastucture.security.config;
 
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaUserRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.UserMapper;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -61,9 +62,12 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
-            String userEmail = jwtUtils.parseToken(token).getSubject();
+            Claims claims = jwtUtils.parseToken(token);
+            String userEmail = claims.getSubject();
+            String picture = claims.get("picture",String.class);
             SecurityUser securityUser = new SecurityUser(
-                    userMapper.toDomain(jpaUserRepository.findByEmail(userEmail).orElse(null))
+                    userMapper.toDomain(jpaUserRepository.findByEmail(userEmail).orElse(null)),
+                    picture
             );
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());

@@ -4,10 +4,10 @@ import { useExam } from "./ExamStaticProvider";
 export const TimeContext = createContext();
 
 export const TimeProvider = ({onTimeUp,children})=>{
-    const {duration} = useExam();
+    const {duration,isReview} = useExam();
     const [timeLeft,setTimeLeft] = useState(duration);
     useEffect(()=>{
-            if(!duration) return;
+            if(!duration||isReview) return;
             const timer = setInterval(()=>
                 setTimeLeft(prev=>{
                     if(prev<=1){
@@ -19,7 +19,7 @@ export const TimeProvider = ({onTimeUp,children})=>{
                 })
             ,1000)
             return ()=>clearInterval(timer);
-        },[onTimeUp])
+        },[onTimeUp,isReview])
         const value ={
             timeLeft
         }

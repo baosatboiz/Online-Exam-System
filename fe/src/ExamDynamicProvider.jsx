@@ -8,7 +8,13 @@ export const SessionContext = createContext();
 export const ExamDynamicProvider = ({attemptId,children})=>{
         const {flatSequence,total} = useExam();
         const [currentIndex,setCurrentIndex] = useState(0);
-        const [answer,setAnswer] = useState({});
+        const [answer,setAnswer] = useState(()=>{
+                let res={};
+                flatSequence.map(group=>
+                    group.questions.map(question=>res={...res,[question.questionId]:question.userChoice})
+                )  
+                return res;  
+            });
         const navigate = useNavigate();
         const chooseAnswer = useCallback(async (choice)=>{
             const data = await fetchData(`/api/exam-attempts/${attemptId}/answer`,{

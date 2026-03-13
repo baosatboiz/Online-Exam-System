@@ -19,7 +19,7 @@ const TimeDisplay = React.memo(()=>{
 export default function ExamHeader({}){
     const{currentItem,onSubmit} = useSession();
     const part = currentItem.partType;
-    const {title} = useExam();
+    const {title,isReview} = useExam();
     const[palete,setPalete] = useState(false);
     return(
         <header className="fixed-top bg-primary d-flex justify-content-between px-sm-3 px-1 py-1">
@@ -42,8 +42,11 @@ export default function ExamHeader({}){
                 </div>
             </div>
             <div className="d-flex gap-0 gap-sm-4 align-items-center">
-                <TimeDisplay/>
+                {!isReview?
+                <><TimeDisplay/>
                 <button onClick={onSubmit} className="btn btn-success pe-0 pe-sm-3">Submit</button>
+                </>:
+                <p className="fw-bold m-0">Review Mode</p>}
             </div>
         </header>
     )

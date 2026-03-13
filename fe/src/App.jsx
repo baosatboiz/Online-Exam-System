@@ -16,7 +16,8 @@ function App() {
       <Route path="/auth" element={<AuthWrapperPage/>}></Route>
       <Route element={<ProtectedRoute/>}>
         <Route path='/' element={<Home/>}/>      
-        <Route path="/exam/:attemptId" element={<ExamPageWrapper/>}></Route>
+        <Route path="/exam/:attemptId" element={<ExamPageWrapper isReview={false}/>}></Route>
+        <Route path="/review/:attemptId" element={<ExamPageWrapper isReview={true}/>}></Route>
         <Route path="/result/:attemptId" element={<ResultPage/>}></Route>
       </Route>
       </Routes>

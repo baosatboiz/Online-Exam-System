@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 
 const data={
     score:770,
@@ -12,6 +12,8 @@ const data={
 export default function ResultPage(){
     const location = useLocation();
     const {data} = location.state;
+    const {attemptId} = useParams();
+    const navigate = useNavigate();
     const beautify = (x)=>{
         const hours = Math.floor(x/3600);
         const minute = Math.floor((x%3600)/60);
@@ -81,7 +83,8 @@ export default function ResultPage(){
         </div>
         <div className="d-flex gap-3 mt-5">
             <button className="btn btn-outline-primary flex-grow-1 rounded-pill fw-bold p-3"><i class="bi bi-arrow-left"></i> Back Home</button>
-            <button className="btn btn-primary flex-grow-1 rounded-pill fw-bold p-3">View detail explanation</button>
+            <button className="btn btn-primary flex-grow-1 rounded-pill fw-bold p-3 "
+            onClick={()=>navigate(`/review/${attemptId}`)}>View detail explanation</button>
         </div>
         </div>
         </div>

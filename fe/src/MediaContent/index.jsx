@@ -6,12 +6,19 @@ export default function MediaContent({data}){
         <div className="spinner-border"></div>
         <span>Loading</span>
     </div>)
+    const normalize = ()=>{
+        if(data.imageUrl.startsWith('[')){
+            return JSON.parse(data.imageUrl);
+        }
+        return [data.imageUrl];
+    }
     return (
         <div className="custom-scroll overflow-auto h-100 shadow-sm">
         <div className="">
             {data.imageUrl&&
-            <div className="">
-            <img src={data.imageUrl} className="img-fluid object-fit-contain" style={{maxHeight:"480px"}}/>
+            <div className="">{normalize().map(imgUrl=>
+            <img src={imgUrl} className="img-fluid objaect-fit-contain" style={{maxHeight:"480px"}}/>
+            )}
             </div>}
             {data.audioUrl&&
             <div className="p-3">

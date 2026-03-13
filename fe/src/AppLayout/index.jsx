@@ -9,7 +9,7 @@ export default function AppLayout(){
             <TimeProvider>
             <div><ExamHeader/></div>
             </TimeProvider>
-            <div className="mt-5 pt-5"><ExamLayout/></div>
+            <div className="my-5 py-5"><ExamLayout/></div>
             <div><Pagination/></div>
         </div>
     )

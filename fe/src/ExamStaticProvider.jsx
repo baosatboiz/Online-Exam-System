@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 
 export const ExamStaticContext = createContext();
 
-export function ExamStaticProvider({exam,children}){
+export function ExamStaticProvider({exam,children,isReview}){
     const flatSequence = useMemo(()=>{
         if(!exam) return [];
         let sequence =[];
@@ -13,12 +13,14 @@ export function ExamStaticProvider({exam,children}){
         )
         return sequence;
     },[exam])
+    console.log(flatSequence);
     const value = useMemo(()=>({
         flatSequence,
         title:exam.title,
         total:flatSequence.length,
-        duration:exam.durationMinutes*60
-    }),[exam,flatSequence])
+        duration:exam.durationMinutes*60,
+        isReview
+    }),[exam,flatSequence,isReview])
        return(
         <ExamStaticContext.Provider value={value}>
             {children}

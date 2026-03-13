@@ -23,6 +23,7 @@ public record ReviewExamAttemptResponse(
     ) {}
 
     public record QuestionReviewResponse(
+            Long questionId,
             String content,
             List<ChoiceReviewResponse> choices,
             ChoiceKey correctChoice,

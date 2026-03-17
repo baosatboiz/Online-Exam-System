@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
@@ -18,6 +19,7 @@ import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaQues
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMinimalMapper;
 import com.example.toeicwebsite.infrastucture.persistence.projection.TotalAttemtpProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final JpaExamAttemptAnswerRepository jpaExamAttemptAnswerRepository;
     private final ExamAttemptEntityMapper examAttemptEntityMapper;
     private final ExamAttemptMapper examAttemptMapper;
+    private final ExamAttemptMinimalMapper examAttemptMinimalMapper;
     private final ExamAttemptEntityUpdateMapper examAttemptEntityUpdateMapper;
     private final JpaQuestionRepository jpaQuestionRepository;
 
@@ -66,20 +69,15 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     }
 
     @Override
-    public void saveAnsweredQuestion(ExamAttempt examAttempt, Question question, ChoiceKey choiceKey) {
-        ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttempt.getId().value())
+    public Optional<ExamAttempt> findByBusinessIdMinimal(UUID businessId) {
+        return jpaExamAttemptRepository.findByBusinessIdMinimal(businessId).map(examAttemptMinimalMapper::toDomainMinimal);
+    }
+
+    @Override
+    public void saveAnsweredQuestion(ExamAttemptId examAttemptId, Long questionId, ChoiceKey choiceKey) {
+        ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttemptId.value())
                 .orElseThrow(() -> new DomainNotFoundException("Exam Attempt not found"));
-        QuestionEntity questionEntity = jpaQuestionRepository.findById(question.getQuestionId())
-                .orElseThrow(() -> new DomainNotFoundException("Question not found"));
-        ExamAttemptAnswerEntity answer = jpaExamAttemptAnswerRepository.findByQuestionIdAndExamAttemptId(question.getQuestionId(), examAttemptEntity.getId())
-                .orElse(null);
-        if (answer == null) {
-            answer = new ExamAttemptAnswerEntity();
-            answer.setExamAttempt(examAttemptEntity);
-            answer.setQuestion(questionEntity);
-        }
-        answer.setChoiceKey(choiceKey);
-        jpaExamAttemptAnswerRepository.save(answer);
+        jpaExamAttemptAnswerRepository.upsertAnswer(examAttemptEntity.getId(), questionId, choiceKey.toString());
     }
 
     @Override

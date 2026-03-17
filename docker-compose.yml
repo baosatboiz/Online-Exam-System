@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     networks:
      - oes-network
+    ports:
+      - "8080:8080"
   frontend:
     build:
       context: ./fe

@@ -1,12 +1,12 @@
 package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
+import com.example.toeicwebsite.domain.exam.model.Exam;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -20,6 +20,15 @@ public interface ExamScheduleMapper {
     @Mapping(target = "examId", source = "exam")
     ExamSchedule toDomain(ExamScheduleEntity entity);
 
+
+    @Mapping(target = "businessId",source="examScheduleId")
+    ExamScheduleEntity toEntity(ExamSchedule domain, @Context ExamEntity exam);
+
+    default LocalDateTime map(Instant instant) {
+        return instant == null ? null
+                : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    }
+    default UUID map(ExamScheduleId examScheduleId){ return examScheduleId.value();}
     default ExamScheduleId map(UUID businessId) {
         return new ExamScheduleId(businessId);
     }
@@ -32,5 +41,9 @@ public interface ExamScheduleMapper {
 
     default Instant map(LocalDateTime time) {
         return time == null ? null : time.toInstant(ZoneOffset.UTC);
+    }
+    @AfterMapping
+    static void fill(@MappingTarget ExamScheduleEntity examScheduleEntity,@Context ExamEntity exam){
+        examScheduleEntity.setExam(exam);
     }
 }

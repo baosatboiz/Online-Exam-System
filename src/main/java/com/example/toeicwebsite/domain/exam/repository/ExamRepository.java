@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.domain.exam.repository;
 
 import com.example.toeicwebsite.domain.exam.model.Exam;
+import com.example.toeicwebsite.domain.exam.model.ExamHeader;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,6 @@ public interface ExamRepository {
     Optional<Exam> findByBusinessId(UUID id);
     Integer findDurationByBusinessId(UUID id);
     Exam findFullExam(UUID id);
+    List<ExamHeader> findAll();
     Map<ExamId,Exam> findByBusinessIdIn(List<ExamId> ids);
 }

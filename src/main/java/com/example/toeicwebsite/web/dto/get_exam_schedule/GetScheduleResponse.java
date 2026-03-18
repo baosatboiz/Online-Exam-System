@@ -12,7 +12,8 @@ public record GetScheduleResponse(
         Instant openAt,
         Instant closeAt,
         Long totalAttempts,
-        String userStatus
+        String userStatus,
+        String examMode
 
 ) {
 }

@@ -1,4 +1,4 @@
-package com.example.toeicwebsite.web.mapper.get_schedule_mapper;
+package com.example.toeicwebsite.web.mapper.schedule_mapper;
 
 import com.example.toeicwebsite.application.query.GetScheduleQuery;
 import com.example.toeicwebsite.application.result.GetScheduleResult;
@@ -7,9 +7,6 @@ import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.web.dto.get_exam_schedule.GetScheduleRequest;
 import com.example.toeicwebsite.web.dto.get_exam_schedule.GetScheduleResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -30,4 +27,5 @@ public interface GetScheduleMapper {
         default String map(ExamStatus status){
             return status.name();
         }
+        default String map(ExamMode examMode){return examMode.name();}
 }

@@ -32,9 +32,9 @@ public class ExamScheduleEntity {
     @Column(nullable = false)
     private ExamMode mode;
 
-    @Column(name = "open_at", nullable = false)
+    @Column(name = "open_at")
     private LocalDateTime openAt;
 
-    @Column(name = "end_at", nullable = false)
+    @Column(name = "end_at")
     private LocalDateTime endAt;
 }

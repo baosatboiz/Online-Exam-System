@@ -29,6 +29,7 @@ public class ScheduleAssembler {
                 schedule.getOpenAt(),
                 schedule.getEndAt(),
                 totalAttempts,
-                status!=null?status:ExamStatus.NOT_STARTED);
+                status!=null?status:ExamStatus.NOT_STARTED,
+                schedule.getMode());
     }
 }

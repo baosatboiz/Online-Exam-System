@@ -7,6 +7,7 @@ import Home from './Home/index.jsx';
 import AuthWrapperPage from './AuthWrapperPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx'
 import { AuthProvider } from './AuthProvider.jsx';
+import ManageSchedule from './ManageSchedule/index.jsx';
 function App() {
   return (
     <div className="">
@@ -19,6 +20,7 @@ function App() {
         <Route path="/exam/:attemptId" element={<ExamPageWrapper isReview={false}/>}></Route>
         <Route path="/review/:attemptId" element={<ExamPageWrapper isReview={true}/>}></Route>
         <Route path="/result/:attemptId" element={<ResultPage/>}></Route>
+        <Route path="/manage-schedule" element={<ManageSchedule/>}></Route>
       </Route>
       </Routes>
       </AuthProvider>

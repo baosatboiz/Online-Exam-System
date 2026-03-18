@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface JpaExamScheduleRepository extends JpaRepository<ExamScheduleEntity, Long> {
     Optional<ExamScheduleEntity> findByBusinessId(UUID businessId);
     List<ExamScheduleEntity> findByMode(ExamMode mode, Pageable pageable);
+
+    void deleteByBusinessId(UUID businessId);
 }

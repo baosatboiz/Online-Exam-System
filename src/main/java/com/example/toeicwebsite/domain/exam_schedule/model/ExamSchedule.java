@@ -14,6 +14,7 @@ public class ExamSchedule {
     private ExamMode mode;
 
     public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode) {
+
         if(mode==ExamMode.REAL){
             if(openAt==null || endAt==null||openAt.isAfter(endAt)) throw new BusinessRuleException("Invalid time schedule");
         }
@@ -23,6 +24,10 @@ public class ExamSchedule {
         this.endAt = endAt;
         this.mode = mode;
     }
+    public static ExamSchedule create(ExamId examId,Instant openAt,Instant endAt,ExamMode mode){
+        return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,mode);
+    }
+
 
     public boolean canStart(Instant now){
         if(isReal()) return !now.isBefore(openAt) && !now.isAfter(endAt);

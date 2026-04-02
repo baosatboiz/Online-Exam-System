@@ -1,0 +1,66 @@
+.manage-schedule-page {
+    background:
+        radial-gradient(circle at 85% 15%, rgba(255, 200, 110, 0.24), transparent 40%),
+        radial-gradient(circle at 10% 85%, rgba(44, 143, 255, 0.2), transparent 42%),
+        linear-gradient(180deg, #f8fbff 0%, #f5f7fa 100%);
+}
+
+.manage-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid #e8ecf1;
+    border-radius: 1.25rem;
+    box-shadow: 0 15px 40px rgba(36, 48, 77, 0.08);
+}
+
+.schedule-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4f698b;
+    font-weight: 700;
+}
+
+.mode-filter .btn {
+    min-width: 84px;
+}
+
+.mode-section {
+    border: 1px solid #d8e4f4;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.95rem;
+}
+
+.schedule-item {
+    border: 1px solid #e2e7f2;
+    border-radius: 0.85rem;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(17, 31, 59, 0.05);
+}
+
+.schedule-item h6 {
+    max-width: 75%;
+}
+
+.empty-group {
+    border: 1px dashed #c7d3e7;
+    background: #fbfcff;
+    border-radius: 0.85rem;
+    padding: 1rem;
+    font-size: 0.92rem;
+}
+
+@media (max-width: 767px) {
+    .manage-card {
+        border-radius: 0.85rem;
+    }
+
+    .mode-section {
+        border-radius: 0.8rem;
+    }
+}

@@ -15,10 +15,9 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface GetScheduleMapper {
         @Mapping(target ="page",defaultValue = "0")
-        @Mapping(target = "mode",defaultValue = "PRACTICE")
         GetScheduleQuery toQuery(GetScheduleRequest request,String userId);
         default ExamMode toExamMode(String mode){
-            return ExamMode.valueOf(mode);
+            return mode==null?null:ExamMode.valueOf(mode);
         }
         GetScheduleResponse toResponse(GetScheduleResult result);
         default UUID map(ExamScheduleId examScheduleId){

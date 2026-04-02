@@ -11,6 +11,7 @@ import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamScheduleMap
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

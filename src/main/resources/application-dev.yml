@@ -32,3 +32,5 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.springframework.security: debug
+supabase:
+  url: "https://esivkcijzzeosdmgjdon.supabase.co/storage/v1/object/public/toeic-assets"

@@ -13,11 +13,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ExamAttemptRepository {
-    ExamAttempt save(ExamAttempt examAttempt, String userId);
+    ExamAttempt save(ExamAttempt examAttempt, UUID userId);
     ExamAttempt update(ExamAttempt examAttempt);
     Optional<ExamAttempt> findByBusinessId(UUID businessId);
     Optional<ExamAttempt> findByBusinessIdMinimal(UUID businessId);
     void saveAnsweredQuestion(ExamAttemptId attemptId, Long questionId, ChoiceKey choiceKey);
     Map<ExamScheduleId,Long> countTotalAttemptsIn(List<ExamScheduleId> ids);
-    Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(String userId, List<ExamScheduleId> ids);
+    Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(UUID userId, List<ExamScheduleId> ids);
 }

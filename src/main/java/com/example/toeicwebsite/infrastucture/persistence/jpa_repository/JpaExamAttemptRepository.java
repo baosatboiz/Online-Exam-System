@@ -39,8 +39,8 @@ public interface JpaExamAttemptRepository extends JpaRepository<ExamAttemptEntit
     select ea
     from ExamAttemptEntity ea
     join fetch ea.examSchedule
-    where ea.userId = :userId
+    where ea.user.bussinessId = :userId
     and ea.examSchedule.businessId in :ids
 """)
-    List<ExamAttemptEntity> findByUserIdAndExamScheduleIdsIn(String userId, List<UUID> ids);
+    List<ExamAttemptEntity> findByUserIdAndExamScheduleIdsIn(UUID userId, List<UUID> ids);
 }

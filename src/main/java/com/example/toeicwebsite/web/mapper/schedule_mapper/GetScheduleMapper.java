@@ -5,6 +5,7 @@ import com.example.toeicwebsite.application.result.GetScheduleResult;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
+import com.example.toeicwebsite.domain.user.model.UserId;
 import com.example.toeicwebsite.web.dto.get_exam_schedule.GetScheduleRequest;
 import com.example.toeicwebsite.web.dto.get_exam_schedule.GetScheduleResponse;
 import org.mapstruct.Mapper;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface GetScheduleMapper {
         @Mapping(target ="page",defaultValue = "0")
-        GetScheduleQuery toQuery(GetScheduleRequest request,String userId);
+        GetScheduleQuery toQuery(GetScheduleRequest request, UserId userId);
         default ExamMode toExamMode(String mode){
             return mode==null?null:ExamMode.valueOf(mode);
         }

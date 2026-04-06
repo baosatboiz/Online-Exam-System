@@ -8,14 +8,8 @@ import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptAnswerEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionEntity;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamAttemptAnswerRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamAttemptRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaQuestionRepository;
+import com.example.toeicwebsite.infrastucture.persistence.entity.*;
+import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.*;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
@@ -37,6 +31,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final JpaExamAttemptRepository jpaExamAttemptRepository;
     private final JpaExamScheduleRepository jpaExamScheduleRepository;
     private final JpaExamAttemptAnswerRepository jpaExamAttemptAnswerRepository;
+    private final JpaUserRepository jpaUserRepository;
     private final ExamAttemptEntityMapper examAttemptEntityMapper;
     private final ExamAttemptMapper examAttemptMapper;
     private final ExamAttemptMinimalMapper examAttemptMinimalMapper;
@@ -44,10 +39,12 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final JpaQuestionRepository jpaQuestionRepository;
 
     @Override
-    public ExamAttempt save(ExamAttempt examAttempt, String userId) {
+    public ExamAttempt save(ExamAttempt examAttempt, UUID userId) {
         ExamScheduleEntity examScheduleEntity = jpaExamScheduleRepository.findByBusinessId(examAttempt.getExamScheduleId().value())
                 .orElseThrow(() -> new DomainNotFoundException("Exam Schedule not found"));
-        ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userId);
+        UserEntity userEntity = jpaUserRepository.findByBussinessId(userId)
+                .orElseThrow(() -> new DomainNotFoundException("User not found"));
+        ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userEntity);
         ExamAttemptEntity saved = jpaExamAttemptRepository.save(examAttemptEntity);
         return examAttemptMapper.toDomain(saved);
     }
@@ -89,7 +86,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     }
 
     @Override
-    public Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(String userId, List<ExamScheduleId> ids) {
+    public Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(UUID userId, List<ExamScheduleId> ids) {
         List<UUID> scheduleIds = ids.stream().map(ExamScheduleId::value).toList();
         return jpaExamAttemptRepository.findByUserIdAndExamScheduleIdsIn(userId,scheduleIds)
                 .stream()

@@ -8,6 +8,9 @@ import com.example.toeicwebsite.application.query.ReviewExamAttemptQuery;
 import com.example.toeicwebsite.application.result.*;
 import com.example.toeicwebsite.application.usecase.*;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
+import com.example.toeicwebsite.domain.user.model.UserId;
+import com.example.toeicwebsite.infrastucture.security.config.SecurityUser;
 import com.example.toeicwebsite.web.dto.get_attempt_questions.request.GetAttemptQuestionsRequest;
 import com.example.toeicwebsite.web.dto.get_attempt_questions.response.GetAttemptQuestionsResponse;
 import com.example.toeicwebsite.web.dto.review_exam_attempt.response.ReviewExamAttemptResponse;
@@ -19,11 +22,11 @@ import com.example.toeicwebsite.web.dto.submit_exam.response.SubmitExamResponse;
 import com.example.toeicwebsite.web.mapper.get_attempt_questions.GetAttemptQuestionsWebMapper;
 import com.example.toeicwebsite.web.mapper.review_exam_attempt.ReviewExamAttemptWebMapper;
 import com.example.toeicwebsite.web.mapper.start_exam.StartExamAttemptResponseMapper;
-import com.example.toeicwebsite.web.mapper.start_exam.StartExamAttemptWebMapper;
 import com.example.toeicwebsite.web.mapper.submit_answer.SubmitAnswerMapper;
 import com.example.toeicwebsite.web.mapper.submit_exam.SubmitExamMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -40,25 +43,26 @@ public class StartExamAttemptController {
     private final SubmitExam submitExam;
     private final ReviewExamAttempt reviewExamAttempt;
     private final StartExamAttemptResponseMapper startExamAttemptResponseMapper;
-    private final StartExamAttemptWebMapper startExamAttemptWebMapper;
     private final GetAttemptQuestionsWebMapper getAttemptQuestionsWebMapper;
     private final SubmitAnswerMapper submitAnswerMapper;
     private final SubmitExamMapper submitExamMapper;
     private final ReviewExamAttemptWebMapper reviewExamAttemptWebMapper;
 
     @PostMapping
-    public ResponseEntity<StartExamAttemptResponse> startExamAttempt(@RequestBody StartExamAttemptRequest request) {
-        String userId = "1";
-        StartExamAttemptCommand command = startExamAttemptWebMapper.toCommand(request, userId);
+    public ResponseEntity<StartExamAttemptResponse> startExamAttempt(@RequestBody StartExamAttemptRequest request,
+                                                                     @AuthenticationPrincipal SecurityUser securityUser) {
+        UserId userId = securityUser.getUser().getUserId();
+        StartExamAttemptCommand command = new StartExamAttemptCommand(new ExamScheduleId(request.examScheduleId()), userId);
         StartExamAttemptResult result = startExamAttempt.execute(command);
         return ResponseEntity.ok(startExamAttemptResponseMapper.toResponse(result, Instant.now()));
     }
 
     @GetMapping("/{examAttemptId}/questions")
-    public ResponseEntity<GetAttemptQuestionsResponse> getAttemptQuestions(@PathVariable UUID examAttemptId) {
-        String userId = "1";
+    public ResponseEntity<GetAttemptQuestionsResponse> getAttemptQuestions(@PathVariable UUID examAttemptId,
+                                                                           @AuthenticationPrincipal SecurityUser securityUser) {
+        UserId userId = securityUser.getUser().getUserId();
         GetAttemptQuestionsRequest request = new GetAttemptQuestionsRequest(examAttemptId);
-        GetAttemptQuestionsQuery query = getAttemptQuestionsWebMapper.toQuery(request, userId);
+        GetAttemptQuestionsQuery query = new GetAttemptQuestionsQuery(new ExamAttemptId(examAttemptId), userId);
         GetAttemptQuestionsResult result = getAttemptQuestions.handle(query);
         return ResponseEntity.ok(getAttemptQuestionsWebMapper.toResponse(result));
     }

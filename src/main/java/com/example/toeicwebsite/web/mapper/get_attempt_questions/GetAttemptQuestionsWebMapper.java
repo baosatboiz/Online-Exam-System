@@ -14,13 +14,13 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface GetAttemptQuestionsWebMapper {
 
-    @Mapping(source = "request.attemptId", target = "examAttemptId")
-    @Mapping(target = "userId", expression = "java(userId)")
-    GetAttemptQuestionsQuery toQuery(GetAttemptQuestionsRequest request, @Context String userId);
-
-    default ExamAttemptId map(UUID id) {
-        return new ExamAttemptId(id);
-    }
+//    @Mapping(source = "request.attemptId", target = "examAttemptId")
+//    @Mapping(target = "userId", expression = "java(userId)")
+//    GetAttemptQuestionsQuery toQuery(GetAttemptQuestionsRequest request, @Context String userId);
+//
+//    default ExamAttemptId map(UUID id) {
+//        return new ExamAttemptId(id);
+//    }
 
     @Mapping(source = "parts", target = "parts")
     @Mapping(source = "duration", target = "durationMinutes")

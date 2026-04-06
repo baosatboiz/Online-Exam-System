@@ -6,6 +6,8 @@ import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import com.example.toeicwebsite.domain.user.model.User;
+import com.example.toeicwebsite.domain.user.model.UserId;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +19,7 @@ import java.util.Map;
 public class ExamAttempt {
     private ExamAttemptId id;
     private ExamScheduleId examScheduleId;
+    private UserId userId;
     private Instant startedAt;
     private Instant mustFinishedAt;
     private Instant finishedAt;
@@ -27,16 +30,17 @@ public class ExamAttempt {
     public ExamAttempt() {
     }
 
-    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Integer duration, Instant startedAt){
+    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, User user, Integer duration, Instant startedAt){
         if(!examSchedule.canStart(startedAt)) throw new BusinessRuleException("Exam is not open");
         this.examScheduleId = examSchedule.id();
+        this.userId = user.getUserId();
         this.id = examAttemptId;
         this.startedAt = startedAt;
         mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,duration);
         this.status = ExamStatus.IN_PROGRESS;
     }
-    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Integer duration,Instant now){
-       return new ExamAttempt(examAttemptId,examSchedule,duration,now);
+    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule, User user, Integer duration,Instant now){
+       return new ExamAttempt(examAttemptId,examSchedule, user, duration,now);
     }
     public void answer(Long questionId,ChoiceKey choiceKey,Instant now){
         isInProgress(now);

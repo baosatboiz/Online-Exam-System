@@ -8,6 +8,8 @@ import com.example.toeicwebsite.application.usecase.CreateSchedule;
 import com.example.toeicwebsite.application.usecase.DeleteSchedule;
 import com.example.toeicwebsite.application.usecase.GetSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
+import com.example.toeicwebsite.domain.user.model.UserId;
+import com.example.toeicwebsite.infrastucture.security.config.SecurityUser;
 import com.example.toeicwebsite.web.dto.create_schedule.CreateScheduleRequest;
 import com.example.toeicwebsite.web.dto.create_schedule.CreateScheduleResponse;
 import com.example.toeicwebsite.web.dto.get_exam_schedule.GetScheduleRequest;
@@ -17,6 +19,7 @@ import com.example.toeicwebsite.web.mapper.schedule_mapper.GetScheduleMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,8 +35,9 @@ public class ExamScheduleController {
     private final CreateScheduleMapper createScheduleMapper;
     private final DeleteSchedule deleteSchedule;
     @GetMapping
-    public ResponseEntity<List<GetScheduleResponse>>  getExamSchedules(GetScheduleRequest request){
-        String userId="1";
+    public ResponseEntity<List<GetScheduleResponse>>  getExamSchedules(GetScheduleRequest request,
+                                                                       @AuthenticationPrincipal SecurityUser securityUser){
+        UserId userId= securityUser.getUser().getUserId();
         GetScheduleQuery query = getScheduleMapper.toQuery(request,userId);
         List<GetScheduleResponse> response = getSchedule.handle(query).stream().map(getScheduleMapper::toResponse).toList();
         return ResponseEntity.ok(response);

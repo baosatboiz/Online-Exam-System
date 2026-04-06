@@ -36,7 +36,7 @@ public class GetScheduleImpl implements GetSchedule {
         List<ExamScheduleId> scheduleIds = schedules.stream().map(ExamSchedule::getExamScheduleId).toList();
         Map<ExamId,Exam> exams = examRepository.findByBusinessIdIn(examIds);
         Map<ExamScheduleId,Long> totalAttempts = examAttemptRepository.countTotalAttemptsIn(scheduleIds);
-        Map<ExamScheduleId, ExamStatus> userAttemptStatus = examAttemptRepository.findByUserIdAndScheduleIdsIn(query.userId(),scheduleIds);
+        Map<ExamScheduleId, ExamStatus> userAttemptStatus = examAttemptRepository.findByUserIdAndScheduleIdsIn(query.userId().value(),scheduleIds);
         return scheduleAssembler.toResultList(schedules, exams, totalAttempts, userAttemptStatus);
     }
 }

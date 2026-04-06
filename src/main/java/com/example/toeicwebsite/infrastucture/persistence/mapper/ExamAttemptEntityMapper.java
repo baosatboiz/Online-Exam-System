@@ -4,6 +4,7 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptEntity;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
+import com.example.toeicwebsite.infrastucture.persistence.entity.UserEntity;
 import org.mapstruct.*;
 
 import java.time.Instant;
@@ -18,7 +19,7 @@ public interface ExamAttemptEntityMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "businessId", source = "domain.id"),
             @Mapping(target = "examSchedule", ignore = true),
-            @Mapping(target = "userId", ignore = true),
+            @Mapping(target = "user", ignore = true),
             @Mapping(target = "startedAt", source = "domain.startedAt"),
             @Mapping(target = "mustFinishedAt", source = "domain.mustFinishedAt"),
             @Mapping(target = "finishedAt", source = "domain.finishedAt"),
@@ -27,7 +28,7 @@ public interface ExamAttemptEntityMapper {
     })
     ExamAttemptEntity toEntity(ExamAttempt domain,
                                @Context ExamScheduleEntity examScheduleEntity,
-                               @Context String userId);
+                               @Context UserEntity userEntity);
 
     default UUID map(ExamAttemptId examAttemptId) {
         return examAttemptId.value();
@@ -36,10 +37,10 @@ public interface ExamAttemptEntityMapper {
     default void fillExtra(
             @MappingTarget ExamAttemptEntity entity,
             @Context ExamScheduleEntity examScheduleEntity,
-            @Context String userId
+            @Context UserEntity userEntity
     ) {
         entity.setExamSchedule(examScheduleEntity);
-        entity.setUserId(userId);
+        entity.setUser(userEntity);
     }
 
     default LocalDateTime map(Instant instant) {

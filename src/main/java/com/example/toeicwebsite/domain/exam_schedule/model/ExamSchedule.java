@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.domain.exam_schedule.model;
 
 import com.example.toeicwebsite.domain.exam.model.ExamId;
+import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import lombok.Getter;
 
@@ -12,8 +13,9 @@ public class ExamSchedule {
     private Instant openAt;
     private Instant endAt;
     private ExamMode mode;
+    private PartType partType;
 
-    public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode) {
+    public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode, PartType partType) {
 
         if(mode==ExamMode.REAL){
             if(openAt==null || endAt==null||openAt.isAfter(endAt)) throw new BusinessRuleException("Invalid time schedule");
@@ -23,9 +25,10 @@ public class ExamSchedule {
         this.openAt = openAt;
         this.endAt = endAt;
         this.mode = mode;
+        this.partType = partType;
     }
-    public static ExamSchedule create(ExamId examId,Instant openAt,Instant endAt,ExamMode mode){
-        return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,mode);
+    public static ExamSchedule create(ExamId examId,Instant openAt,Instant endAt,ExamMode mode, PartType partType) {
+        return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,mode,partType);
     }
 
 

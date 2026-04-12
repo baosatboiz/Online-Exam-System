@@ -17,7 +17,8 @@ public enum PartType {
         this.code = code;
     }
 
-    public static PartType fromCode(int code) {
+    public static PartType fromCode(Integer code) {
+        if (code == null) return null;
         for (PartType p : values()) {
             if (p.code == code) {
                 return p;

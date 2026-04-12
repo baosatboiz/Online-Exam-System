@@ -13,7 +13,7 @@ public record GetScheduleResponse(
         Instant closeAt,
         Long totalAttempts,
         String userStatus,
-        String examMode
-
+        String examMode,
+        Integer partNumber
 ) {
 }

@@ -1,5 +1,6 @@
 package com.example.toeicwebsite.application.result;
 
+import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
@@ -14,7 +15,7 @@ public record GetScheduleResult(
         Instant closeAt,
         Long totalAttempts,
         ExamStatus userStatus,
-        ExamMode examMode
-
+        ExamMode examMode,
+        PartType partType
 ) {
 }

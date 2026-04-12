@@ -31,7 +31,7 @@ public class GetScheduleImpl implements GetSchedule {
     private final ScheduleAssembler scheduleAssembler;
     @Override
     public List<GetScheduleResult> handle(GetScheduleQuery query) {
-        List<ExamSchedule> schedules = examScheduleRepository.findBySpecification(query.page(), query.mode());
+        List<ExamSchedule> schedules = examScheduleRepository.findBySpecification(query.page(), query.mode(), query.partType());
         List<ExamId> examIds = schedules.stream().map(ExamSchedule::getExamId).toList();
         List<ExamScheduleId> scheduleIds = schedules.stream().map(ExamSchedule::getExamScheduleId).toList();
         Map<ExamId,Exam> exams = examRepository.findByBusinessIdIn(examIds);

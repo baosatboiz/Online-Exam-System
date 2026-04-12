@@ -12,8 +12,9 @@ import java.util.UUID;
 
 public interface JpaExamScheduleRepository extends JpaRepository<ExamScheduleEntity, Long> {
     Optional<ExamScheduleEntity> findByBusinessId(UUID businessId);
-    @Query("select e from ExamScheduleEntity e where(:mode is NULL or e.mode=:mode)")
-    List<ExamScheduleEntity> findByMode(ExamMode mode, Pageable pageable);
+    @Query("select e from ExamScheduleEntity e where(:mode is NULL or e.mode=:mode) " +
+            "AND (:partNumber IS NULL OR e.partNumber = :partNumber)")
+    List<ExamScheduleEntity> findByMode(ExamMode mode, Integer partNumber, Pageable pageable);
 
     void deleteByBusinessId(UUID businessId);
 }

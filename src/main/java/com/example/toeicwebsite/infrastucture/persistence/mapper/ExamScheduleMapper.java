@@ -2,6 +2,7 @@ package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam.model.Exam;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
+import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
@@ -18,11 +19,21 @@ import java.util.UUID;
 public interface ExamScheduleMapper {
     @Mapping(target = "examScheduleId", source = "businessId")
     @Mapping(target = "examId", source = "exam")
+    @Mapping(target = "partType", source = "partNumber")
     ExamSchedule toDomain(ExamScheduleEntity entity);
+
+    default PartType map(Integer partNumber) {
+        return PartType.fromCode(partNumber);
+    }
 
 
     @Mapping(target = "businessId",source="examScheduleId")
+    @Mapping(target = "partNumber", source = "partType")
     ExamScheduleEntity toEntity(ExamSchedule domain, @Context ExamEntity exam);
+
+    default Integer map(PartType partType) {
+        return partType == null ? null : partType.getCode();
+    }
 
     default LocalDateTime map(Instant instant) {
         return instant == null ? null

@@ -37,4 +37,6 @@ public class ExamScheduleEntity {
 
     @Column(name = "end_at")
     private LocalDateTime endAt;
+
+    private Integer partNumber;
 }

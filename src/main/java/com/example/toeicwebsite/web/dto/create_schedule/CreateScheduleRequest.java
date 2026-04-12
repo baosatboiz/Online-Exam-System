@@ -9,6 +9,7 @@ public record CreateScheduleRequest(
         Instant openAt,
         Instant endAt,
         @NotNull(message = "Exam mode is required")
-        String examMode
+        String examMode,
+        Integer partNumber
 ) {
 }

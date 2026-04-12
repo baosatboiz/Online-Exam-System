@@ -15,7 +15,7 @@ public class CreateScheduleImpl implements CreateSchedule {
     private final ExamScheduleRepository examScheduleRepository;
     @Override
     public CreateScheduleResult execute(CreateScheduleCommand command) {
-        ExamSchedule examSchedule = ExamSchedule.create(command.examId(),command.openAt(),command.endAt(),command.examMode());
+        ExamSchedule examSchedule = ExamSchedule.create(command.examId(),command.openAt(),command.endAt(),command.examMode(),command.partType());
         ExamSchedule saved = examScheduleRepository.save(examSchedule);
         return new CreateScheduleResult(saved.getExamScheduleId());
     }

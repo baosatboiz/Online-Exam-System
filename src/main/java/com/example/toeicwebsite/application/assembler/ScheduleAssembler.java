@@ -3,6 +3,7 @@ package com.example.toeicwebsite.application.assembler;
 import com.example.toeicwebsite.application.result.GetScheduleResult;
 import com.example.toeicwebsite.domain.exam.model.Exam;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
+import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
@@ -30,6 +31,7 @@ public class ScheduleAssembler {
                 schedule.getEndAt(),
                 totalAttempts,
                 status!=null?status:ExamStatus.NOT_STARTED,
-                schedule.getMode());
+                schedule.getMode(),
+                schedule.getPartType());
     }
 }

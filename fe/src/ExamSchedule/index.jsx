@@ -6,6 +6,10 @@ export default function ExamSchedule({ data = mockdata }) {
     const fTime = (s) => s ? new Date(s).toLocaleTimeString('vi-VN',{ hour: '2-digit', minute: '2-digit' }):'';
     const fDate = (s) => s ? new Date(s).toLocaleDateString('vi-VN') : '';
     const isContinuing = data.userStatus === "IN_PROGRESS";
+    const isMiniTest = (data.examMode || '').toUpperCase() === 'MINI_TEST';
+    const resolvedPartNumber = Number.isInteger(Number(data.partNumber)) && Number(data.partNumber) > 0
+        ? Number(data.partNumber)
+        : 1;
     const navigate = useNavigate();
     const handleClick = async()=>{
         try{
@@ -13,7 +17,13 @@ export default function ExamSchedule({ data = mockdata }) {
             method:'POST',
             body:JSON.stringify({examScheduleId:data.scheduleId})
         })
-        navigate(`/exam/${attemptId}`);
+        const miniTestContext = isMiniTest ? { mode: 'MINI_TEST', partNumber: resolvedPartNumber } : null;
+        if (miniTestContext) {
+            sessionStorage.setItem(`exam-attempt-context:${attemptId}`, JSON.stringify(miniTestContext));
+        }
+        navigate(`/exam/${attemptId}`, {
+            state: miniTestContext ? { miniTestContext } : undefined,
+        });
     }
         catch(err){
             console.log(err);
@@ -29,12 +39,22 @@ export default function ExamSchedule({ data = mockdata }) {
                 </span>
             </div>
 
+            {isMiniTest && (
+                <div className="position-absolute top-0 start-0 m-3">
+                    <span className="badge rounded-pill bg-dark text-white px-3 py-2 shadow-sm fw-bold" style={{fontSize: '0.7rem'}}>
+                        PART {resolvedPartNumber}
+                    </span>
+                </div>
+            )}
+
             <div className="text-center mt-3 w-100">
                 <div className="mb-3">
                     <i className="bi bi-file-earmark-text display-4 text-white opacity-75"></i>
                 </div>
                 
-                <h4 className="fw-bold text-white mb-3 text-truncate px-2">{data.title}</h4>
+                <h4 className="fw-bold text-white mb-3 text-truncate px-2">
+                    {isMiniTest ? `Part ${resolvedPartNumber}` : data.title}
+                </h4>
 
                 <div className="d-flex justify-content-center gap-3 text-white mb-3 opacity-90">
                     <small><i className="bi bi-stopwatch me-1"></i>{data.duration}p</small>

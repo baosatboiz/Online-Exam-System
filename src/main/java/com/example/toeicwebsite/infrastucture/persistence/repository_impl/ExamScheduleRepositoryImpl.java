@@ -1,8 +1,8 @@
 package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 
+import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
-import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamRepository;
@@ -11,7 +11,6 @@ import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamScheduleMap
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,9 +29,10 @@ public class ExamScheduleRepositoryImpl implements ExamScheduleRepository {
     }
 
     @Override
-    public List<ExamSchedule> findBySpecification(int page, ExamMode mode) {
-        Pageable pageable = PageRequest.of(page, 10);
-        return jpaExamScheduleRepository.findByMode(mode, pageable).stream().map(examScheduleMapper::toDomain).toList();
+    public List<ExamSchedule> findBySpecification(Integer page, ExamMode mode, PartType partType) {
+        Integer partNumber = partType == null ? null : partType.getCode();
+        Pageable pageable = page == null ? Pageable.unpaged() : PageRequest.of(page, 10);
+        return jpaExamScheduleRepository.findByMode(mode, partNumber, pageable).stream().map(examScheduleMapper::toDomain).toList();
     }
 
     @Override

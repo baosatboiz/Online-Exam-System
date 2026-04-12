@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 export const SessionContext = createContext();
 
-export const ExamDynamicProvider = ({attemptId,children})=>{
-        const {flatSequence,total} = useExam();
+export const ExamDynamicProvider = ({attemptId,children,mode,partNumber})=>{
+    const {flatSequence,total} = useExam();
         const [currentIndex,setCurrentIndex] = useState(0);
         const [answer,setAnswer] = useState(()=>{
                 let res={};
@@ -29,8 +29,12 @@ export const ExamDynamicProvider = ({attemptId,children})=>{
                 method:'PUT'
             })
             console.log(data);
-            navigate(`/result/${attemptId}`,{state:{data:data}});
-        },[attemptId])
+            const miniTestContext = mode === 'MINI_TEST' ? { mode, partNumber: partNumber ?? 1 } : null;
+            if (miniTestContext) {
+                sessionStorage.setItem(`exam-attempt-context:${attemptId}`, JSON.stringify(miniTestContext));
+            }
+            navigate(`/result/${attemptId}`,{state:{data, miniTestContext}});
+        },[attemptId,mode,partNumber,navigate])
         const jumpTo = useCallback((questionId)=>{
             const index = flatSequence.findIndex(group=>{
                 return group.questions.some(q=>q.questionId===questionId);

@@ -4,6 +4,7 @@ import com.example.toeicwebsite.application.command.StartExamAttemptCommand;
 import com.example.toeicwebsite.application.command.SubmitAnswerCommand;
 import com.example.toeicwebsite.application.command.SubmitExamCommand;
 import com.example.toeicwebsite.application.query.GetAttemptQuestionsQuery;
+import com.example.toeicwebsite.application.query.GetPartQuestionQuery;
 import com.example.toeicwebsite.application.query.ReviewExamAttemptQuery;
 import com.example.toeicwebsite.application.result.*;
 import com.example.toeicwebsite.application.usecase.*;
@@ -11,7 +12,6 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.user.model.UserId;
 import com.example.toeicwebsite.infrastucture.security.config.SecurityUser;
-import com.example.toeicwebsite.web.dto.get_attempt_questions.request.GetAttemptQuestionsRequest;
 import com.example.toeicwebsite.web.dto.get_attempt_questions.response.GetAttemptQuestionsResponse;
 import com.example.toeicwebsite.web.dto.review_exam_attempt.response.ReviewExamAttemptResponse;
 import com.example.toeicwebsite.web.dto.start_exam.request.StartExamAttemptRequest;
@@ -42,6 +42,7 @@ public class StartExamAttemptController {
     private final SubmitAnswer submitAnswer;
     private final SubmitExam submitExam;
     private final ReviewExamAttempt reviewExamAttempt;
+    private final GetPartQuestions getPartQuestions;
     private final StartExamAttemptResponseMapper startExamAttemptResponseMapper;
     private final GetAttemptQuestionsWebMapper getAttemptQuestionsWebMapper;
     private final SubmitAnswerMapper submitAnswerMapper;
@@ -61,9 +62,16 @@ public class StartExamAttemptController {
     public ResponseEntity<GetAttemptQuestionsResponse> getAttemptQuestions(@PathVariable UUID examAttemptId,
                                                                            @AuthenticationPrincipal SecurityUser securityUser) {
         UserId userId = securityUser.getUser().getUserId();
-        GetAttemptQuestionsRequest request = new GetAttemptQuestionsRequest(examAttemptId);
         GetAttemptQuestionsQuery query = new GetAttemptQuestionsQuery(new ExamAttemptId(examAttemptId), userId);
         GetAttemptQuestionsResult result = getAttemptQuestions.handle(query);
+        return ResponseEntity.ok(getAttemptQuestionsWebMapper.toResponse(result));
+    }
+
+    @GetMapping("/{examAttemptId}/part-questions")
+    public ResponseEntity<GetAttemptQuestionsResponse> getPartAttemptQuestions(@PathVariable UUID examAttemptId,
+                                                                               @RequestParam int partNumber) {
+        GetPartQuestionQuery query = new GetPartQuestionQuery(new ExamAttemptId(examAttemptId), partNumber);
+        GetAttemptQuestionsResult result = getPartQuestions.handle(query);
         return ResponseEntity.ok(getAttemptQuestionsWebMapper.toResponse(result));
     }
 

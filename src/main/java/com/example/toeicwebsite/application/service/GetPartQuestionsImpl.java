@@ -51,7 +51,7 @@ public class GetPartQuestionsImpl implements GetPartQuestions {
         GetAttemptQuestionsResult.PartResult partResult = mapper.toPartResult(part);
         return new GetAttemptQuestionsResult(
             exam.getTitle(),
-            exam.getDuration() * 60,
+            exam.getDuration(),
             Collections.singletonList(partResult)
         );
     }

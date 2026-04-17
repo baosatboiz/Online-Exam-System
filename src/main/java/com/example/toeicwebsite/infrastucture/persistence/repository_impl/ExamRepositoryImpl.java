@@ -51,6 +51,6 @@ public class ExamRepositoryImpl implements ExamRepository {
         List<UUID> examIds = ids.stream().map(ExamId::value).toList();
         return jpaExamRepository.findByBusinessIdIn(examIds)
                 .stream()
-                .collect(Collectors.toMap(e->new ExamId(e.getBusinessId()), examMapper::toDomain));
+                .collect(Collectors.toMap(e->new ExamId(e.getBusinessId()), examMapper::toCompactDomain));
     }
 }

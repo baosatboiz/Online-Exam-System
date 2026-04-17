@@ -18,7 +18,7 @@ export function ExamStaticProvider({exam,children,isReview}){
         flatSequence,
         title:exam.title,
         total:flatSequence.length,
-        duration:exam.durationMinutes*60,
+        duration:exam.durationMinutes * 60,
         isReview
     }),[exam,flatSequence,isReview])
        return(

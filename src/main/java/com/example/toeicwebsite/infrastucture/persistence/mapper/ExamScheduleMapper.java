@@ -7,6 +7,7 @@ import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
+import com.example.toeicwebsite.infrastucture.persistence.projection.ExamScheduleProjection;
 import org.mapstruct.*;
 
 import java.nio.charset.StandardCharsets;
@@ -21,6 +22,11 @@ public interface ExamScheduleMapper {
     @Mapping(target = "examId", source = "exam")
     @Mapping(target = "partType", source = "partNumber")
     ExamSchedule toDomain(ExamScheduleEntity entity);
+
+    @Mapping(target = "examScheduleId", source = "businessId")
+    @Mapping(target = "examId", source = "examBusinessId")
+    @Mapping(target = "partType", source = "partNumber")
+    ExamSchedule toDomain(ExamScheduleProjection projection);
 
     default PartType map(Integer partNumber) {
         return PartType.fromCode(partNumber);
@@ -50,6 +56,9 @@ public interface ExamScheduleMapper {
         return new ExamId(uuid);
     }
 
+    default ExamId mapExamBusinessId(UUID examBusinessId){
+        return new ExamId(examBusinessId);
+    }
     default Instant map(LocalDateTime time) {
         return time == null ? null : time.toInstant(ZoneOffset.UTC);
     }

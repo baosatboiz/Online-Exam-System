@@ -1,10 +1,9 @@
 package com.example.toeicwebsite.domain.exam_registration.service;
 
-import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistration;
 import com.example.toeicwebsite.domain.exam_registration.repository.ExamRegistrationRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
-import com.example.toeicwebsite.domain.user.model.User;
+import com.example.toeicwebsite.domain.user.model.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +11,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RegistrationPolicy {
     private final ExamRegistrationRepository examRegistrationRepository;
-    public void validateRegistration(ExamSchedule examSchedule, User user){
-        if(examRegistrationRepository.existsByUserIdAndScheduleId(user.getUserId(),examSchedule.getExamScheduleId())){
+    public void validateRegistration(ExamSchedule examSchedule, UserId userId){
+        if(examRegistrationRepository.existsByUserIdAndScheduleId(userId,examSchedule.getExamScheduleId())){
             throw new BusinessRuleException("You have registered this schedule before");
         }
         long currentCount = examRegistrationRepository.countByScheduleId(examSchedule.getExamScheduleId());
         if(examSchedule.isFull(currentCount)) throw new BusinessRuleException("This schedule is full of slots");
-        if(examRegistrationRepository.existsOverlapping(user.getUserId(),examSchedule.getOpenAt(),examSchedule.getEndAt())){
+        if(examRegistrationRepository.existsOverlapping(userId,examSchedule.getOpenAt(),examSchedule.getEndAt())){
             throw new BusinessRuleException("You're having overlapping schedule");
         }
     }

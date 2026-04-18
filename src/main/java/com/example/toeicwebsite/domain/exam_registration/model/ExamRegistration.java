@@ -18,10 +18,9 @@ public class ExamRegistration {
     private Instant expiredAt;
 
 
-    public ExamRegistration() {
-    }
 
-    public ExamRegistration(ExamRegistrationId examRegistrationId, ExamScheduleId examScheduleId, UserId userId, RegistrationStatus registrationStatus) {
+
+    public ExamRegistration(ExamRegistrationId examRegistrationId, ExamScheduleId examScheduleId, UserId userId, RegistrationStatus registrationStatus,Instant createAt, Instant confirmAt,Instant expiredAt) {
         if (examRegistrationId == null || examScheduleId == null || userId == null || registrationStatus == null) {
             throw new BusinessRuleException("Registration fields cannot be null");
         }
@@ -29,11 +28,13 @@ public class ExamRegistration {
         this.examScheduleId = examScheduleId;
         this.userId = userId;
         this.registrationStatus = registrationStatus;
-        this.createAt = Instant.now();
+        this.createAt = createAt;
+        this.confirmAt = confirmAt;
+        this.expiredAt = expiredAt;
     }
 
     public static ExamRegistration createPending(ExamScheduleId examScheduleId, UserId userId) {
-        return new ExamRegistration(ExamRegistrationId.newId(), examScheduleId, userId, RegistrationStatus.PENDING);
+        return new ExamRegistration(ExamRegistrationId.newId(), examScheduleId, userId, RegistrationStatus.PENDING,Instant.now(),null,null);
     }
 
     public boolean isConfirmed(){

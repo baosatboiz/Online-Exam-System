@@ -4,6 +4,7 @@ import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.exam.model.PartType;
 import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistration;
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
+import com.example.toeicwebsite.domain.shared.Money;
 import com.example.toeicwebsite.domain.user.model.UserId;
 import lombok.Getter;
 
@@ -19,14 +20,18 @@ public class ExamSchedule {
     private ExamMode mode;
     private PartType partType;
     private Integer maxSlot;
+    private Money price;
 
-    public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode, PartType partType,Integer maxSlot) {
+    public ExamSchedule(ExamScheduleId examScheduleId, ExamId examId, Instant openAt, Instant endAt, ExamMode mode, PartType partType,Integer maxSlot,Money price) {
 
         if (mode == ExamMode.REAL) {
             if (openAt == null || endAt == null || openAt.isAfter(endAt))
                 throw new BusinessRuleException("Invalid time schedule");
-            if (maxSlot == null || maxSlot <= 0)
+            if (maxSlot == null || maxSlot <= 0 )
                 throw new BusinessRuleException("Real exam must have positive max slots");
+            if(price == null || price.isZeroOrLess())
+                throw new BusinessRuleException("Real exam must have positive price");
+
         }
         this.examScheduleId = examScheduleId;
         this.examId = examId;
@@ -35,12 +40,13 @@ public class ExamSchedule {
         this.mode = mode;
         this.partType = partType;
         this.maxSlot=maxSlot;
+        this.price = price;
     }
     public static ExamSchedule createPractice(ExamId examId, PartType partType) {
-        return new ExamSchedule(ExamScheduleId.newId(),examId,null,null,ExamMode.PRACTICE,partType,null);
+        return new ExamSchedule(ExamScheduleId.newId(),examId,null,null,ExamMode.PRACTICE,partType,null,null);
     }
-    public static ExamSchedule createReal(ExamId examId,Instant openAt,Instant endAt, PartType partType, Integer maxSlot) {
-        return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,ExamMode.REAL,partType,maxSlot);
+    public static ExamSchedule createReal(ExamId examId,Instant openAt,Instant endAt, PartType partType, Integer maxSlot,Money price) {
+        return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,ExamMode.REAL,partType,maxSlot,price);
     }
 
     public void canStart(UserId userId, Optional<ExamRegistration> registration, Instant now) {

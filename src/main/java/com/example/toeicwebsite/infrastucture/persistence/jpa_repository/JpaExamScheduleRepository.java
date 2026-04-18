@@ -19,6 +19,8 @@ public interface JpaExamScheduleRepository extends JpaRepository<ExamScheduleEnt
             "e.openAt as openAt, " +
             "e.endAt as endAt, " +
             "e.partNumber as partNumber, " +
+            "e.price as price, " +
+            "e.maxSlot as maxSlot, " +
             "ex.businessId as examBusinessId " +
             "from ExamScheduleEntity e join e.exam ex " +
             "where(:mode is NULL or e.mode=:mode) " +

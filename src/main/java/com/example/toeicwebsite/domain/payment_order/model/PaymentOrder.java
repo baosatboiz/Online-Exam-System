@@ -19,14 +19,16 @@ public class PaymentOrder {
     private Instant paidAt;
     private final Instant createdAt;
 
-    private PaymentOrder(PaymentOrderId paymentOrderId, ExamRegistrationId examRegistrationId,
-                         Money price, PaymentStatus paymentStatus, String orderCode, Instant createdAt) {
+    public PaymentOrder(PaymentOrderId paymentOrderId, ExamRegistrationId examRegistrationId,
+                         Money price, PaymentStatus paymentStatus, String orderCode, Instant createdAt, String bankTransactionId,Instant paidAt) {
         this.paymentOrderId = paymentOrderId;
         this.examRegistrationId = examRegistrationId;
         this.price = price;
         this.paymentStatus = paymentStatus;
         this.orderCode = orderCode;
         this.createdAt = createdAt;
+        this.bankTransactionId= bankTransactionId;
+        this.paidAt = paidAt;
     }
 
     public static PaymentOrder create(ExamRegistrationId regId, Money amount) {
@@ -41,7 +43,9 @@ public class PaymentOrder {
                 amount,
                 PaymentStatus.PENDING,
                 generatedCode,
-                Instant.now()
+                Instant.now(),
+                null,
+                null
         );
     }
 

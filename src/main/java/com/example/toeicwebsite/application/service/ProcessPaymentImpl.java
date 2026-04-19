@@ -27,6 +27,10 @@ public class ProcessPaymentImpl implements ProcessPayment {
         PaymentOrder paymentOrder = paymentOrderRepository.findByOrderCode(command.orderCode())
                 .orElseThrow(() -> new DomainNotFoundException("PaymentOrder not found for code: " + command.orderCode()));
 
+        if (paymentOrder.isPaid()) {
+            return ProcessPaymentResult.ok(); 
+        }
+
         if (command.transferAmount().getAmount().compareTo(paymentOrder.getPrice().getAmount()) < 0) {
             throw new BusinessRuleException("Transfer amount is less than required price");
         }

@@ -11,6 +11,7 @@ public interface ExamRegistrationRepository {
     boolean existsOverlapping(UserId userId, Instant openAt, Instant endAt);
     boolean existsByUserIdAndScheduleId(UserId userId,ExamScheduleId examScheduleId);
     java.util.Optional<ExamRegistration> findByUserIdAndScheduleId(UserId userId,ExamScheduleId examScheduleId);
+    java.util.List<ExamRegistration> findByUserIdAndScheduleIdIn(UserId userId, java.util.List<ExamScheduleId> examScheduleIds);
     ExamRegistration save(ExamRegistration examRegistration);
     java.util.Optional<ExamRegistration> findById(com.example.toeicwebsite.domain.exam_registration.model.ExamRegistrationId id);
 }

@@ -14,7 +14,8 @@ export default function PaymentModal({ show, onClose, scheduleId, paymentInfo, o
                 if (data.paymentStatus === 'PAID' || data.registrationStatus === 'CONFIRMED') {
                     setStatus('PAID');
                     clearInterval(interval);
-                    if (onSuccess) onSuccess();
+                    // Không gọi onSuccess() ở đây để tránh bị nhảy vào bài thi ngay lập tức
+                    // Người dùng sẽ bấm nút "Tiếp tục" để tự trigger
                 }
             } catch (err) {
                 console.error("Polling error", err);

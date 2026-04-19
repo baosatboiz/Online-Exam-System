@@ -16,6 +16,7 @@ public record GetScheduleResult(
         Long totalAttempts,
         ExamStatus userStatus,
         ExamMode examMode,
-        PartType partType
+        PartType partType,
+        boolean isRegistered
 ) {
 }

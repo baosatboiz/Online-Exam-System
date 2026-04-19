@@ -3,8 +3,10 @@ package com.example.toeicwebsite.application.service;
 import com.example.toeicwebsite.application.command.CreateScheduleCommand;
 import com.example.toeicwebsite.application.result.CreateScheduleResult;
 import com.example.toeicwebsite.application.usecase.CreateSchedule;
+import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
+import com.example.toeicwebsite.domain.shared.Money;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ public class CreateScheduleImpl implements CreateSchedule {
     @Override
     public CreateScheduleResult execute(CreateScheduleCommand command) {
         ExamSchedule examSchedule;
-        if (command.examMode() == com.example.toeicwebsite.domain.exam_schedule.model.ExamMode.PRACTICE) {
+        if (command.examMode() == ExamMode.PRACTICE) {
             examSchedule = ExamSchedule.createPractice(command.examId(), command.partType());
         } else {
             // Default maxSlot and price for REAL mode since it's not provided in CreateScheduleCommand initially
@@ -26,7 +28,7 @@ public class CreateScheduleImpl implements CreateSchedule {
                     command.endAt(), 
                     command.partType(), 
                     100, 
-                    new com.example.toeicwebsite.domain.shared.Money(java.math.BigDecimal.valueOf(100000), "VND")
+                    new Money(java.math.BigDecimal.valueOf(100000), "VND")
             );
         }
         ExamSchedule saved = examScheduleRepository.save(examSchedule);

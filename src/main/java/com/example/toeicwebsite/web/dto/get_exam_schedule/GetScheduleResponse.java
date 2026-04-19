@@ -14,6 +14,7 @@ public record GetScheduleResponse(
         Long totalAttempts,
         String userStatus,
         String examMode,
-        Integer partNumber
+        Integer partNumber,
+        boolean isRegistered
 ) {
 }

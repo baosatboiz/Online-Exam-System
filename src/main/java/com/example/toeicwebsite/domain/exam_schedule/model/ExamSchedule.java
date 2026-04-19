@@ -9,6 +9,7 @@ import com.example.toeicwebsite.domain.user.model.UserId;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Getter
@@ -31,7 +32,6 @@ public class ExamSchedule {
                 throw new BusinessRuleException("Real exam must have positive max slots");
             if(price == null || price.isZeroOrLess())
                 throw new BusinessRuleException("Real exam must have positive price");
-
         }
         this.examScheduleId = examScheduleId;
         this.examId = examId;
@@ -46,6 +46,9 @@ public class ExamSchedule {
         return new ExamSchedule(ExamScheduleId.newId(),examId,null,null,ExamMode.PRACTICE,partType,null,null);
     }
     public static ExamSchedule createReal(ExamId examId,Instant openAt,Instant endAt, PartType partType, Integer maxSlot,Money price) {
+        if (openAt != null && openAt.isBefore(Instant.now().plus(3, ChronoUnit.DAYS))) {
+            throw new BusinessRuleException("Real exam must be scheduled at least 3 days in advance");
+        }
         return new ExamSchedule(ExamScheduleId.newId(),examId,openAt,endAt,ExamMode.REAL,partType,maxSlot,price);
     }
 

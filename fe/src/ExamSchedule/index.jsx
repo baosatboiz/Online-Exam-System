@@ -17,6 +17,7 @@ export default function ExamSchedule({ data }) {
     const [showPayment, setShowPayment] = useState(false);
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [registered, setRegistered] = useState(!!data.isRegistered);
     const navigate = useNavigate();
 
     const navigateToExam = (attemptId) => {
@@ -50,12 +51,8 @@ export default function ExamSchedule({ data }) {
                     try {
                         const payInfo = await fetchData(`/api/exam-registration/payment-info/${data.scheduleId}`, { method: 'GET' });
                         if (payInfo.paymentStatus === 'PAID' || payInfo.registrationStatus === 'CONFIRMED') {
-                            alert("Đã xác nhận thanh toán! Đang vào bài thi...");
-                            const { attemptId } = await fetchData(`/api/exam-attempts`, {
-                                method: 'POST',
-                                body: JSON.stringify({ examScheduleId: data.scheduleId })
-                            });
-                            navigateToExam(attemptId);
+                            setRegistered(true);
+                            alert("Bạn đã đăng ký thành công! Vui lòng chờ đến giờ thi.");
                         } else {
                             setPaymentInfo(payInfo);
                             setShowPayment(true);
@@ -128,17 +125,58 @@ export default function ExamSchedule({ data }) {
                     )}
 
                     <div className="mt-3">
-                        <button onClick={handleClick} disabled={isProcessing} className={`btn ${isProcessing ? 'btn-secondary' : isContinuing ? 'btn-warning' : isReal ? 'btn-warning' : 'btn-light'} rounded-pill px-4 py-2 w-100 fw-bold shadow-sm transition-all`}>
-                            {isProcessing ? (
-                                <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý</>
-                            ) : isContinuing ? (
-                                <><i className="bi bi-arrow-right-circle me-2"></i>Tiếp tục</>
-                            ) : isReal ? (
-                                <><i className="bi bi-shield-lock me-2"></i>Đăng ký thi</>
-                            ) : (
-                                'Luyện tập ngay'
-                            )}
-                        </button>
+                        {(() => {
+                            const now = new Date().getTime();
+                            const openTime = data.openAt ? new Date(data.openAt).getTime() : null;
+                            const closeTime = data.closeAt ? new Date(data.closeAt).getTime() : null;
+                            const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+
+                            let btnText = 'Luyện tập ngay';
+                            let btnStyle = 'btn-light';
+                            let isBtnDisabled = isProcessing;
+                            let icon = '';
+
+                            if (isProcessing) {
+                                btnText = 'Đang xử lý';
+                                btnStyle = 'btn-secondary';
+                                icon = <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>;
+                            } else if (isContinuing) {
+                                btnText = 'Tiếp tục';
+                                btnStyle = 'btn-warning';
+                                icon = <i className="bi bi-arrow-right-circle me-2"></i>;
+                            } else if (isReal && openTime && closeTime) {
+                                if (now > closeTime) {
+                                    btnText = 'Đã kết thúc';
+                                    btnStyle = 'btn-secondary';
+                                    isBtnDisabled = true;
+                                    icon = <i className="bi bi-x-circle me-2"></i>;
+                                } else if (now >= openTime && now <= closeTime) {
+                                    btnText = 'Vào phòng thi';
+                                    btnStyle = 'btn-danger';
+                                    icon = <i className="bi bi-door-open me-2"></i>;
+                                } else if (registered) {
+                                    btnText = 'Đã đăng ký - Chờ thi';
+                                    btnStyle = 'btn-info text-white opacity-75';
+                                    isBtnDisabled = true;
+                                    icon = <i className="bi bi-calendar-check me-2"></i>;
+                                } else if (now >= openTime - threeDaysMs && now < openTime) {
+                                    btnText = 'Đóng đăng ký';
+                                    btnStyle = 'btn-secondary';
+                                    isBtnDisabled = true;
+                                    icon = <i className="bi bi-lock-fill me-2"></i>;
+                                } else {
+                                    btnText = 'Đăng ký thi';
+                                    btnStyle = 'btn-warning';
+                                    icon = <i className="bi bi-shield-lock me-2"></i>;
+                                }
+                            }
+
+                            return (
+                                <button onClick={handleClick} disabled={isBtnDisabled} className={`btn ${btnStyle} rounded-pill px-4 py-2 w-100 fw-bold shadow-sm transition-all`}>
+                                    {icon}{btnText}
+                                </button>
+                            );
+                        })()}
                     </div>
                 </div>
 
@@ -156,8 +194,7 @@ export default function ExamSchedule({ data }) {
                 scheduleId={data.scheduleId}
                 paymentInfo={paymentInfo}
                 onSuccess={() => {
-                    // Payment succeeded, try start exam
-                    handleClick();
+                    setRegistered(true);
                 }}
             />
         </>

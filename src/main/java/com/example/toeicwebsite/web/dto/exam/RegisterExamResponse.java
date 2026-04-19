@@ -1,5 +1,7 @@
 package com.example.toeicwebsite.web.dto.exam;
 
+import java.time.Instant;
+
 public record RegisterExamResponse(
         String registrationId,
         PaymentInfoResponse paymentInfo
@@ -9,7 +11,7 @@ public record RegisterExamResponse(
             String amount,
             String qrCodeUrl,
             String paymentContent,
-            java.time.Instant expiredAt,
+            Instant expiredAt,
             String status
     ) {}
 }

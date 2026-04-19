@@ -14,6 +14,7 @@ public interface JpaExamRegistrationRepository extends JpaRepository<ExamRegistr
     Long countByExamScheduleId(UUID examScheduleId);
     boolean existsByUserIdAndExamScheduleId(UUID userId, UUID examScheduleId);
     java.util.Optional<ExamRegistrationEntity> findByUserIdAndExamScheduleId(UUID userId, UUID examScheduleId);
+    java.util.List<ExamRegistrationEntity> findByUserIdAndExamScheduleIdIn(UUID userId, java.util.List<UUID> examScheduleIds);
 
     @Query("SELECT CASE WHEN COUNT(er) > 0 THEN true ELSE false END FROM ExamRegistrationEntity er, ExamScheduleEntity es " +
            "WHERE er.examScheduleId = es.businessId " +

@@ -44,6 +44,13 @@ public class ExamRegistrationRepositoryImpl implements ExamRegistrationRepositor
     }
 
     @Override
+    public java.util.List<ExamRegistration> findByUserIdAndScheduleIdIn(UserId userId, java.util.List<ExamScheduleId> examScheduleIds) {
+        if (examScheduleIds == null || examScheduleIds.isEmpty()) return java.util.Collections.emptyList();
+        java.util.List<java.util.UUID> ids = examScheduleIds.stream().map(ExamScheduleId::value).toList();
+        return jpaRepository.findByUserIdAndExamScheduleIdIn(userId.value(), ids).stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public ExamRegistration save(ExamRegistration examRegistration) {
         ExamRegistrationEntity entity = mapper.toEntity(examRegistration);
         ExamRegistrationEntity saved = jpaRepository.save(entity);

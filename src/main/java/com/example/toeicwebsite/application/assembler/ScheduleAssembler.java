@@ -18,11 +18,20 @@ public class ScheduleAssembler {
             List<ExamSchedule> schedules,
             Map<ExamId,Exam> exams,
             Map<ExamScheduleId,Long> totalAttempts,
-            Map<ExamScheduleId, ExamStatus> userStatus
+            Map<ExamScheduleId, ExamStatus> userStatus,
+            Map<ExamScheduleId, Boolean> userRegistrationStatus
     ){
-        return schedules.stream().map(s->toResult(s,exams.get(s.getExamId()),totalAttempts.get(s.getExamScheduleId()),userStatus.get(s.getExamScheduleId()))).toList();
+        return schedules.stream()
+                .filter(s -> exams.get(s.getExamId()) != null)
+                .map(s->toResult(
+                        s,
+                        exams.get(s.getExamId()),
+                        totalAttempts != null ? totalAttempts.getOrDefault(s.getExamScheduleId(), 0L) : 0L,
+                        userStatus != null ? userStatus.get(s.getExamScheduleId()) : ExamStatus.NOT_STARTED,
+                        userRegistrationStatus != null ? userRegistrationStatus.getOrDefault(s.getExamScheduleId(), false) : false
+                )).toList();
     }
-    private GetScheduleResult toResult(ExamSchedule schedule,Exam exam, Long totalAttempts, ExamStatus status){
+    private GetScheduleResult toResult(ExamSchedule schedule,Exam exam, Long totalAttempts, ExamStatus status, boolean isRegistered){
         return new GetScheduleResult(
                 schedule.getExamScheduleId(),
                 exam.getTitle(),
@@ -32,6 +41,7 @@ public class ScheduleAssembler {
                 totalAttempts,
                 status!=null?status:ExamStatus.NOT_STARTED,
                 schedule.getMode(),
-                schedule.getPartType());
+                schedule.getPartType(),
+                isRegistered);
     }
 }

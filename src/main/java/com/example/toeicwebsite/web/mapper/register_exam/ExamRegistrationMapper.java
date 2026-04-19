@@ -12,6 +12,6 @@ public interface ExamRegistrationMapper {
     @Mapping(target = "paymentInfo", source = "paymentOrderResult")
     RegisterExamResponse toResponse(RegisterExamResult result);
 
-    @Mapping(target = "amount", expression = "java(payment.amount().toString())")
+    @Mapping(target = "amount", expression = "java(payment.amount().getAmount().toPlainString())")
     RegisterExamResponse.PaymentInfoResponse toPaymentInfoResponse(RegisterExamResult.PaymentOrderResult payment);
 }

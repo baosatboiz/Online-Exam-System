@@ -59,6 +59,6 @@ public class ExamRegistrationRepositoryImpl implements ExamRegistrationRepositor
 
     @Override
     public Optional<ExamRegistration> findById(ExamRegistrationId id) {
-        return jpaRepository.findById(id.value()).map(mapper::toDomain);
+        return jpaRepository.findByBusinessId(id.value()).map(mapper::toDomain);
     }
 }

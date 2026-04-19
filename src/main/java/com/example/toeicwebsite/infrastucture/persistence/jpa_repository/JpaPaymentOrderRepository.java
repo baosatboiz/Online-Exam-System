@@ -8,7 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface JpaPaymentOrderRepository extends JpaRepository<PaymentOrderEntity, UUID> {
+public interface JpaPaymentOrderRepository extends JpaRepository<PaymentOrderEntity, Long> {
     Optional<PaymentOrderEntity> findByOrderCode(String orderCode);
     Optional<PaymentOrderEntity> findByExamRegistrationId(UUID examRegistrationId);
+    Optional<PaymentOrderEntity> findByBusinessId(UUID businessId);
 }

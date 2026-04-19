@@ -14,19 +14,19 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface PaymentOrderEntityMapper {
 
-
-    @Mapping(target = "paymentOrderId",     source = "paymentOrderId")
-    @Mapping(target = "examRegistrationId", source = "examRegistrationId")
-    @Mapping(target = "price",              source = "price")
-    @Mapping(target = "paymentStatus",      source = "paymentStatus")
-    @Mapping(target = "bankTransactionId",  source = "bankTransactionId")
-    @Mapping(target = "paidAt",             source = "paidAt")
+    @Mapping(target = "paymentOrderId",      source = "businessId")
+    @Mapping(target = "examRegistrationId",  source = "examRegistrationId")
+    @Mapping(target = "price",               source = "price")
+    @Mapping(target = "paymentStatus",       source = "paymentStatus")
+    @Mapping(target = "bankTransactionId",   source = "bankTransactionId")
+    @Mapping(target = "paidAt",              source = "paidAt")
     PaymentOrder toDomain(PaymentOrderEntity entity);
 
-    @Mapping(target = "paymentOrderId",     source = "paymentOrderId")
-    @Mapping(target = "examRegistrationId", source = "examRegistrationId")
-    @Mapping(target = "price",              source = "price")
-    @Mapping(target = "paymentStatus",      source = "paymentStatus")
+    @Mapping(target = "id",                  ignore = true)
+    @Mapping(target = "businessId",          source = "paymentOrderId")
+    @Mapping(target = "examRegistrationId",  source = "examRegistrationId")
+    @Mapping(target = "price",               source = "price")
+    @Mapping(target = "paymentStatus",       source = "paymentStatus")
     PaymentOrderEntity toEntity(PaymentOrder domain);
 
 

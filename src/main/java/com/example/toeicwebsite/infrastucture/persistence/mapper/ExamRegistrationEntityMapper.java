@@ -14,16 +14,17 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface ExamRegistrationEntityMapper {
 
-    @Mapping(target = "examRegistrationId", source = "examRegistrationId")
-    @Mapping(target = "examScheduleId",     source = "examScheduleId")
-    @Mapping(target = "userId",             source = "userId")
-    @Mapping(target = "registrationStatus", source = "registrationStatus")
+    @Mapping(target = "id",                  ignore = true)
+    @Mapping(target = "businessId",          source = "examRegistrationId")
+    @Mapping(target = "examScheduleId",      source = "examScheduleId")
+    @Mapping(target = "userId",              source = "userId")
+    @Mapping(target = "registrationStatus",  source = "registrationStatus")
     ExamRegistrationEntity toEntity(ExamRegistration domain);
 
-    @Mapping(target = "examRegistrationId", source = "examRegistrationId")
-    @Mapping(target = "examScheduleId",     source = "examScheduleId")
-    @Mapping(target = "userId",             source = "userId")
-    @Mapping(target = "registrationStatus", source = "registrationStatus")
+    @Mapping(target = "examRegistrationId",  source = "businessId")
+    @Mapping(target = "examScheduleId",      source = "examScheduleId")
+    @Mapping(target = "userId",              source = "userId")
+    @Mapping(target = "registrationStatus",  source = "registrationStatus")
     ExamRegistration toDomain(ExamRegistrationEntity entity);
 
     // ── Type conversion helpers ──────────────────────────────────────────────

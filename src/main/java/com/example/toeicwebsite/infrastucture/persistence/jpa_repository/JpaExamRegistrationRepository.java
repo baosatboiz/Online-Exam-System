@@ -7,14 +7,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface JpaExamRegistrationRepository extends JpaRepository<ExamRegistrationEntity, UUID> {
+public interface JpaExamRegistrationRepository extends JpaRepository<ExamRegistrationEntity, Long> {
     Long countByExamScheduleId(UUID examScheduleId);
     boolean existsByUserIdAndExamScheduleId(UUID userId, UUID examScheduleId);
-    java.util.Optional<ExamRegistrationEntity> findByUserIdAndExamScheduleId(UUID userId, UUID examScheduleId);
-    java.util.List<ExamRegistrationEntity> findByUserIdAndExamScheduleIdIn(UUID userId, java.util.List<UUID> examScheduleIds);
+    Optional<ExamRegistrationEntity> findByUserIdAndExamScheduleId(UUID userId, UUID examScheduleId);
+    List<ExamRegistrationEntity> findByUserIdAndExamScheduleIdIn(UUID userId, List<UUID> examScheduleIds);
+    Optional<ExamRegistrationEntity> findByBusinessId(UUID businessId);
 
     @Query("SELECT CASE WHEN COUNT(er) > 0 THEN true ELSE false END FROM ExamRegistrationEntity er, ExamScheduleEntity es " +
            "WHERE er.examScheduleId = es.businessId " +

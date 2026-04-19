@@ -1,9 +1,6 @@
 package com.example.toeicwebsite.infrastucture.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,8 +13,11 @@ import java.util.UUID;
 @Setter
 public class ExamRegistrationEntity {
     @Id
-    @Column(name = "exam_registration_id", nullable = false)
-    private UUID examRegistrationId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "business_id", nullable = false, unique = true)
+    private UUID businessId;
 
     @Column(name = "exam_schedule_id", nullable = false)
     private UUID examScheduleId;

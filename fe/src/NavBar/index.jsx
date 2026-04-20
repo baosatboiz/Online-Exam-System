@@ -29,6 +29,9 @@ export default function NavBar() {
             <li className="nav-item">
               <NavLink className="nav-link" to="/results">Kết quả</NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/my-vocabulary">My Vocabulary</NavLink>
+            </li>
             <li className="nav-item dropdown">
               <a 
                 className="nav-link dropdown-toggle" 

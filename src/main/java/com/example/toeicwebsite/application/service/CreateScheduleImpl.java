@@ -5,7 +5,6 @@ import com.example.toeicwebsite.application.result.CreateScheduleResult;
 import com.example.toeicwebsite.application.usecase.CreateSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

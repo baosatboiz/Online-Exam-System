@@ -8,6 +8,7 @@ import AuthWrapperPage from './AuthWrapperPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx'
 import { AuthProvider } from './AuthProvider.jsx';
 import ManageSchedule from './ManageSchedule/index.jsx';
+import MyVocabulary from './MyVocabulary/index.jsx';
 function App() {
   return (
     <div className="">
@@ -21,6 +22,7 @@ function App() {
         <Route path="/review/:attemptId" element={<ExamPageWrapper isReview={true}/>}></Route>
         <Route path="/result/:attemptId" element={<ResultPage/>}></Route>
         <Route path="/manage-schedule" element={<ManageSchedule/>}></Route>
+        <Route path="/my-vocabulary" element={<MyVocabulary/>}></Route>
       </Route>
       </Routes>
       </AuthProvider>

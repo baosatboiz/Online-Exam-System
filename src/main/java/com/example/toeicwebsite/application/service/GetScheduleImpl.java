@@ -11,6 +11,8 @@ import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
+import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistration;
+import com.example.toeicwebsite.domain.exam_registration.repository.ExamRegistrationRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
@@ -29,14 +31,25 @@ public class GetScheduleImpl implements GetSchedule {
     private final ExamRepository examRepository;
     private final ExamAttemptRepository examAttemptRepository;
     private final ScheduleAssembler scheduleAssembler;
+    private final ExamRegistrationRepository examRegistrationRepository;
     @Override
     public List<GetScheduleResult> handle(GetScheduleQuery query) {
-        List<ExamSchedule> schedules = examScheduleRepository.findBySpecification(query.page(), query.mode());
+        List<ExamSchedule> schedules = examScheduleRepository.findBySpecification(query.page(), query.mode(), query.partType());
         List<ExamId> examIds = schedules.stream().map(ExamSchedule::getExamId).toList();
         List<ExamScheduleId> scheduleIds = schedules.stream().map(ExamSchedule::getExamScheduleId).toList();
         Map<ExamId,Exam> exams = examRepository.findByBusinessIdIn(examIds);
         Map<ExamScheduleId,Long> totalAttempts = examAttemptRepository.countTotalAttemptsIn(scheduleIds);
-        Map<ExamScheduleId, ExamStatus> userAttemptStatus = examAttemptRepository.findByUserIdAndScheduleIdsIn(query.userId(),scheduleIds);
-        return scheduleAssembler.toResultList(schedules, exams, totalAttempts, userAttemptStatus);
+        Map<ExamScheduleId, ExamStatus> userAttemptStatus = examAttemptRepository.findByUserIdAndScheduleIdsIn(query.userId().value(),scheduleIds);
+        
+        List<ExamRegistration> registrations =
+            examRegistrationRepository.findByUserIdAndScheduleIdIn(query.userId(), scheduleIds);
+            
+        Map<ExamScheduleId, Boolean> userRegistrationStatus = schedules.stream()
+            .collect(Collectors.toMap(
+                ExamSchedule::getExamScheduleId,
+                schedule -> registrations.stream().anyMatch(r -> r.getExamScheduleId().equals(schedule.getExamScheduleId()) && r.isConfirmed())
+            ));
+
+        return scheduleAssembler.toResultList(schedules, exams, totalAttempts, userAttemptStatus, userRegistrationStatus);
     }
 }

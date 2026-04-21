@@ -1,0 +1,2 @@
+ALTER TABLE exam_schedules ADD COLUMN IF NOT EXISTS max_slot INTEGER;
+ALTER TABLE exam_schedules ADD COLUMN IF NOT EXISTS price NUMERIC(19, 2);

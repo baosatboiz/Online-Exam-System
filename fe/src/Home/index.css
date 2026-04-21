@@ -1,0 +1,44 @@
+.home-dashboard {
+    background:
+        radial-gradient(circle at 15% 18%, rgba(255, 207, 120, 0.2), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(101, 179, 255, 0.22), transparent 36%),
+        linear-gradient(180deg, #f8fbff 0%, #f6f7fa 100%);
+}
+
+.mode-filter-panel .btn {
+    min-width: 112px;
+}
+
+.mode-section {
+    border-radius: 1rem;
+    border: 1px solid #d6e4f5;
+    box-shadow: 0 12px 24px rgba(20, 32, 56, 0.06);
+}
+
+.mode-practice {
+    background: linear-gradient(180deg, #f9fcff 0%, #eef5ff 100%);
+}
+
+.mode-real {
+    background: linear-gradient(180deg, #fffdf6 0%, #fff5de 100%);
+    border-color: #f0dbaa;
+}
+
+.empty-mode {
+    border: 1px dashed #c8d6e8;
+    border-radius: 0.85rem;
+    background: rgba(255, 255, 255, 0.65);
+    padding: 1rem;
+    color: #6b7c93;
+}
+
+@media (max-width: 767px) {
+    .dashboard-hero,
+    .mode-section {
+        border-radius: 0.8rem;
+    }
+
+    .mode-filter-panel .btn {
+        min-width: 96px;
+    }
+}

@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.infrastucture.persistence.mapper;
 
 import com.example.toeicwebsite.domain.exam.model.Exam;
+import com.example.toeicwebsite.domain.exam.model.ExamHeader;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
@@ -26,6 +27,14 @@ public interface ExamMapper {
     @Mapping(target = "duration", source = "durationMinutes")
     @Mapping(target = "questionCache", ignore = true)
     Exam toDomain(ExamEntity entity);
+
+    @Mapping(target = "examId", source = "businessId")
+    @Mapping(target = "part", source = "questionGroups",ignore = true)
+    @Mapping(target = "duration", source = "durationMinutes")
+    @Mapping(target = "questionCache", ignore = true)
+    Exam toCompactDomain(ExamEntity entity);
+
+    ExamHeader toHeader(ExamEntity entity);
 
     @Mapping(source = "examId",target = "businessId")
     @Mapping(source = "part",target = "questionGroups")

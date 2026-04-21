@@ -1,0 +1,2 @@
+ALTER TABLE exam_schedules ALTER COLUMN open_at DROP NOT NULL;
+ALTER TABLE exam_schedules ALTER COLUMN end_at DROP NOT NULL;

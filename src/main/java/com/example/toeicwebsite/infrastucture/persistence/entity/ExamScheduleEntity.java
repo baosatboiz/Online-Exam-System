@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,9 +33,17 @@ public class ExamScheduleEntity {
     @Column(nullable = false)
     private ExamMode mode;
 
-    @Column(name = "open_at", nullable = false)
+    @Column(name = "open_at")
     private LocalDateTime openAt;
 
-    @Column(name = "end_at", nullable = false)
+    @Column(name = "end_at")
     private LocalDateTime endAt;
+
+    private Integer partNumber;
+
+    @Column(name = "max_slot")
+    private Integer maxSlot;
+
+    @Column(name = "price", precision = 19, scale = 2)
+    private BigDecimal price;
 }

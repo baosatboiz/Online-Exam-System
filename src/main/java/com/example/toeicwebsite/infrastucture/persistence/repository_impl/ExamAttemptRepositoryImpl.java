@@ -1,23 +1,19 @@
 package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttempt;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus;
 import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptRepository;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptAnswerEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamAttemptEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.ExamScheduleEntity;
-import com.example.toeicwebsite.infrastucture.persistence.entity.QuestionEntity;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamAttemptAnswerRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamAttemptRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
-import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaQuestionRepository;
+import com.example.toeicwebsite.infrastucture.persistence.entity.*;
+import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.*;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMapper;
+import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptMinimalMapper;
 import com.example.toeicwebsite.infrastucture.persistence.projection.TotalAttemtpProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -35,16 +31,20 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final JpaExamAttemptRepository jpaExamAttemptRepository;
     private final JpaExamScheduleRepository jpaExamScheduleRepository;
     private final JpaExamAttemptAnswerRepository jpaExamAttemptAnswerRepository;
+    private final JpaUserRepository jpaUserRepository;
     private final ExamAttemptEntityMapper examAttemptEntityMapper;
     private final ExamAttemptMapper examAttemptMapper;
+    private final ExamAttemptMinimalMapper examAttemptMinimalMapper;
     private final ExamAttemptEntityUpdateMapper examAttemptEntityUpdateMapper;
     private final JpaQuestionRepository jpaQuestionRepository;
 
     @Override
-    public ExamAttempt save(ExamAttempt examAttempt, String userId) {
+    public ExamAttempt save(ExamAttempt examAttempt, UUID userId) {
         ExamScheduleEntity examScheduleEntity = jpaExamScheduleRepository.findByBusinessId(examAttempt.getExamScheduleId().value())
                 .orElseThrow(() -> new DomainNotFoundException("Exam Schedule not found"));
-        ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userId);
+        UserEntity userEntity = jpaUserRepository.findByBussinessId(userId)
+                .orElseThrow(() -> new DomainNotFoundException("User not found"));
+        ExamAttemptEntity examAttemptEntity = examAttemptEntityMapper.toEntity(examAttempt, examScheduleEntity, userEntity);
         ExamAttemptEntity saved = jpaExamAttemptRepository.save(examAttemptEntity);
         return examAttemptMapper.toDomain(saved);
     }
@@ -66,20 +66,15 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     }
 
     @Override
-    public void saveAnsweredQuestion(ExamAttempt examAttempt, Question question, ChoiceKey choiceKey) {
-        ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttempt.getId().value())
+    public Optional<ExamAttempt> findByBusinessIdMinimal(UUID businessId) {
+        return jpaExamAttemptRepository.findByBusinessIdMinimal(businessId).map(examAttemptMinimalMapper::toDomainMinimal);
+    }
+
+    @Override
+    public void saveAnsweredQuestion(ExamAttemptId examAttemptId, Long questionId, ChoiceKey choiceKey) {
+        ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttemptId.value())
                 .orElseThrow(() -> new DomainNotFoundException("Exam Attempt not found"));
-        QuestionEntity questionEntity = jpaQuestionRepository.findById(question.getQuestionId())
-                .orElseThrow(() -> new DomainNotFoundException("Question not found"));
-        ExamAttemptAnswerEntity answer = jpaExamAttemptAnswerRepository.findByQuestionIdAndExamAttemptId(question.getQuestionId(), examAttemptEntity.getId())
-                .orElse(null);
-        if (answer == null) {
-            answer = new ExamAttemptAnswerEntity();
-            answer.setExamAttempt(examAttemptEntity);
-            answer.setQuestion(questionEntity);
-        }
-        answer.setChoiceKey(choiceKey);
-        jpaExamAttemptAnswerRepository.save(answer);
+        jpaExamAttemptAnswerRepository.upsertAnswer(examAttemptEntity.getId(), questionId, choiceKey.toString());
     }
 
     @Override
@@ -91,7 +86,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     }
 
     @Override
-    public Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(String userId, List<ExamScheduleId> ids) {
+    public Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(UUID userId, List<ExamScheduleId> ids) {
         List<UUID> scheduleIds = ids.stream().map(ExamScheduleId::value).toList();
         return jpaExamAttemptRepository.findByUserIdAndExamScheduleIdsIn(userId,scheduleIds)
                 .stream()

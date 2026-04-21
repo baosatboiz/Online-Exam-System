@@ -15,7 +15,7 @@ public interface ExamAttemptEntityUpdateMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "businessId", ignore = true),
             @Mapping(target = "examSchedule", ignore = true),
-            @Mapping(target = "userId", ignore = true),
+            @Mapping(target = "user", ignore = true),
             @Mapping(target = "answers", ignore = true),
 
             @Mapping(target = "startedAt", source = "domain.startedAt"),

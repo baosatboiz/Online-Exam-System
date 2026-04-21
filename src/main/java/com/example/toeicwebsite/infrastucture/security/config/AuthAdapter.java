@@ -28,6 +28,12 @@ public class AuthAdapter implements AuthPort {
     }
 
     @Override
+    public String generateToken(String email, List<Role> roles, String picture) {
+        return jwtUtils.generateToken(email,roles.stream().map(Enum::name).toList(),picture);
+
+    }
+
+    @Override
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }

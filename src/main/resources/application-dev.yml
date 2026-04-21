@@ -15,7 +15,30 @@ spring:
   flyway:
     enabled: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 261892871681-pf7dj933v8jjat676lp8snl0ahgfjfmg.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+
 logging:
   level:
     org.hibernate.SQL: debug
     org.springframework.security: debug
+supabase:
+  url: "https://esivkcijzzeosdmgjdon.supabase.co/storage/v1/object/public/toeic-assets"
+
+payment:
+  sepay:
+        webhook-token: "BaoTran_PTIT_2026_Secured"
+        bank-bin: "970422"
+        account-number: "0325703673"
+        account-name: "TRAN DAO GIA BAO"
+

@@ -11,10 +11,13 @@ import com.example.toeicwebsite.domain.exam_attempt.repository.ExamAttemptReposi
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.repository.ExamScheduleRepository;
 import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
+import com.example.toeicwebsite.domain.user.model.User;
+import com.example.toeicwebsite.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,6 +27,7 @@ public class StartExamAttemptImpl implements StartExamAttempt {
     private final ExamAttemptRepository examAttemptRepository;
     private final ExamScheduleRepository examScheduleRepository;
     private final ExamRepository examRepository;
+    private final UserRepository userRepository;
     private final StartExamAttemptResultMapper startExamAttemptResultMapper;
 
     @Override
@@ -31,6 +35,8 @@ public class StartExamAttemptImpl implements StartExamAttempt {
         Instant currentTime = Instant.now();
         ExamSchedule examSchedule = examScheduleRepository.findByBusinessId(command.examScheduleId().value())
                 .orElseThrow(() -> new DomainNotFoundException("Exam schedule not found"));
+
+        User user = userRepository.findByBusinessId(command.userId().value());
 
 // ExamAttempt constructor includes this validation
 //        if (!examSchedule.canStart(currentTime)) {
@@ -42,8 +48,15 @@ public class StartExamAttemptImpl implements StartExamAttempt {
 //                .orElseThrow(() -> new DomainException("Exam not found"));
         Integer duration = examRepository.findDurationByBusinessId(examBusinessId);
 
-        ExamAttempt examAttempt = new ExamAttempt(ExamAttemptId.newId(), examSchedule, duration, currentTime);
-        ExamAttempt saved = examAttemptRepository.save(examAttempt, command.userId());
+        ExamAttempt examAttempt = new ExamAttempt(
+                ExamAttemptId.newId(),
+                examSchedule,
+                user,
+                duration,
+                currentTime,
+                Optional.empty()
+        );
+        ExamAttempt saved = examAttemptRepository.save(examAttempt, command.userId().value());
         return startExamAttemptResultMapper.from(saved);
     }
 }

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <title>Online Exam System</title>
+
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ── Reset ── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      /* ── Nền gốc – tránh flash trắng ── */
+      html {
+        min-height: 100%;
+        background: #0e1f50;
+      }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: #0e1f50;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      :root {
+        --teal:  #1db87e;
+        --teal2: #13f0a0;
+        --sky:   #5ab4f0;
+        --white: #f0f6ff;
+      }
+
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Exo 2', sans-serif;
+        color: var(--white);
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse 70% 60% at 50% 40%, rgba(40,80,200,.75) 0%, transparent 70%),
+          radial-gradient(ellipse 50% 40% at 15% 90%, rgba(29,184,126,.12) 0%, transparent 60%),
+          radial-gradient(ellipse 40% 30% at 85% 10%, rgba(90,180,240,.1) 0%, transparent 60%),
+          linear-gradient(180deg, #0e1f50 0%, #162562 100%);
+        /* Fade-out khi React sẵn sàng */
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+      }
+      #loading-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* Grid nền */
+      #loading-screen .bg-grid {
+        position: fixed; inset: 0;
+        background-image:
+          linear-gradient(rgba(29,184,126,.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(29,184,126,.07) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        animation: gridDrift 22s linear infinite;
+      }
+      @keyframes gridDrift {
+        from { background-position: 0 0; }
+        to   { background-position: 60px 60px; }
+      }
+
+      /* Particles */
+      #loading-screen .ls-particles { position: fixed; inset: 0; pointer-events: none; }
+      #loading-screen .ls-particle {
+        position: absolute;
+        border-radius: 50%;
+        animation: floatP var(--d, 8s) ease-in-out infinite;
+        opacity: 0;
+      }
+      @keyframes floatP {
+        0%   { opacity: 0;    transform: translateY(0)      scale(1); }
+        20%  { opacity: .35; }
+        80%  { opacity: .15; }
+        100% { opacity: 0;    transform: translateY(-110px) scale(.4); }
+      }
+
+      /* Card */
+      .loading-card {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn .9s ease both;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Logo wrap */
+      .logo-wrap {
+        position: relative;
+        width: 240px; height: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Logo static */
+      .logo-static {
+        position: absolute;
+        width: 168px;
+        animation: logoPulse 3s ease-in-out infinite;
+      }
+      @keyframes logoPulse {
+        0%,100% { filter: drop-shadow(0 6px 24px rgba(29,184,126,.3)); }
+        50%      { filter: drop-shadow(0 6px 52px rgba(29,184,126,.7)); }
+      }
+
+      /* Spinner primary */
+      .spinner-ring {
+        position: absolute;
+        width: 238px; height: 238px;
+        transform-origin: center;
+        animation: spinRing 2.4s linear infinite;
+      }
+      @keyframes spinRing { to { transform: rotate(360deg); } }
+
+      /* Spinner secondary */
+      .spinner-ring2 {
+        position: absolute;
+        width: 212px; height: 212px;
+        transform-origin: center;
+        opacity: .7;
+        animation: spinRing2 4.5s linear infinite;
+      }
+      @keyframes spinRing2 { to { transform: rotate(-360deg); } }
+
+      /* Dots */
+      .loading-dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 22px;
+        align-items: center;
+      }
+      .loading-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: var(--teal);
+        animation: dotBounce 1.4s ease-in-out infinite;
+      }
+      .loading-dot:nth-child(2) { animation-delay: .2s; background: var(--teal2); }
+      .loading-dot:nth-child(3) { animation-delay: .4s; background: var(--sky); }
+      @keyframes dotBounce {
+        0%,80%,100% { transform: scale(.65); opacity: .35; }
+        40%          { transform: scale(1.25); opacity: 1; }
+      }
+
+      .loading-label {
+        margin-top: 10px;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .6rem;
+        letter-spacing: .28em;
+        color: #9ab4d8;
+        text-transform: uppercase;
+        opacity: .9;
+      }
+
+      .ls-bottom-bar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--teal), var(--sky), var(--teal), transparent);
+        opacity: .5;
+      }
+      .ls-version {
+        position: fixed; bottom: 12px; right: 22px;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: .52rem;
+        color: rgba(150,180,220,.5);
+        letter-spacing: .15em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="loading-screen">
+      <div class="bg-grid"></div>
+      <div class="ls-particles" id="ls-particles"></div>
+
+      <div class="loading-card">
+        <div class="logo-wrap">
+
+          <!-- Spinner ring chính (comet) -->
+          <svg class="spinner-ring" viewBox="0 0 238 238" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cometGrad" x1="0" y1="0" x2="0" y2="238" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#13f0a0" stop-opacity="0"/>
+                <stop offset="55%"  stop-color="#1db87e" stop-opacity=".8"/>
+                <stop offset="85%"  stop-color="#13f0a0"/>
+                <stop offset="100%" stop-color="#ffffff"/>
+              </linearGradient>
+              <filter id="cometGlow">
+                <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="headGlow">
+                <feGaussianBlur stdDeviation="5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <circle cx="119" cy="119" r="112" stroke="rgba(29,184,126,.22)" stroke-width="2" stroke-dasharray="5 7"/>
+            <circle cx="119" cy="119" r="112" stroke="url(#cometGrad)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="548 156" filter="url(#cometGlow)"/>
+            <circle cx="119" cy="7"   r="6"   fill="#ffffff" filter="url(#headGlow)"/>
+            <circle cx="119" cy="7"   r="10"  fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+            <circle cx="231" cy="119" r="4.5" fill="#1db87e" filter="url(#cometGlow)" opacity=".8"/>
+            <circle cx="7"   cy="119" r="4.5" fill="#13f0a0" filter="url(#cometGlow)" opacity=".8"/>
+            <circle cx="119" cy="231" r="4.5" fill="#5ab4f0" filter="url(#cometGlow)" opacity=".8"/>
+          </svg>
+
+          <!-- Spinner ring phụ -->
+          <svg class="spinner-ring2" viewBox="0 0 212 212" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="106" cy="106" r="102" stroke="rgba(90,180,240,.45)" stroke-width="1.5" stroke-dasharray="9 11"/>
+          </svg>
+
+          <!-- Logo tĩnh -->
+          <svg class="logo-static" viewBox="0 0 200 215" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sG" x1="50" y1="10" x2="150" y2="170" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#2048b8"/><stop offset="100%" stop-color="#0d1e5a"/>
+              </linearGradient>
+              <linearGradient id="bG" x1="60" y1="80" x2="140" y2="140" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#c8ddf8"/><stop offset="100%" stop-color="#9ab8e8"/>
+              </linearGradient>
+              <linearGradient id="cG" x1="75" y1="85" x2="125" y2="135" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#ffffff"/><stop offset="100%" stop-color="#c8ddf8"/>
+              </linearGradient>
+              <linearGradient id="kG" x1="60" y1="20" x2="140" y2="55" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#1a3a8c"/><stop offset="100%" stop-color="#0a1840"/>
+              </linearGradient>
+              <filter id="g2">
+                <feGaussianBlur stdDeviation="2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M100 14 L164 42 L164 110 Q164 156 100 180 Q36 156 36 110 L36 42 Z" fill="url(#sG)" stroke="#2a5bd4" stroke-width="2"/>
+            <path d="M100 26 L152 50 L152 108 Q152 144 100 164 Q48 144 48 108 L48 50 Z" fill="none" stroke="rgba(90,150,240,.5)" stroke-width="1.8"/>
+            <line x1="54"  y1="78" x2="66"  y2="78" stroke="#4a90d9" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="54"  cy="78" r="2.5" fill="#4a90d9"/>
+            <line x1="54"  y1="78" x2="54"  y2="94" stroke="#4a90d9" stroke-width="1.5"/>
+            <circle cx="54"  cy="94" r="2"   fill="#4a90d9" opacity=".6"/>
+            <line x1="146" y1="78" x2="134" y2="78" stroke="#4a90d9" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="146" cy="78" r="2.5" fill="#4a90d9"/>
+            <line x1="146" y1="78" x2="146" y2="94" stroke="#4a90d9" stroke-width="1.5"/>
+            <circle cx="146" cy="94" r="2"   fill="#4a90d9" opacity=".6"/>
+            <rect x="98" y="86" width="4" height="52" rx="1" fill="#8ab0d8"/>
+            <path d="M100 88 Q80 84 62 90 L62 136 Q80 130 100 133 Z"     fill="url(#bG)" stroke="#7aa0cc" stroke-width="1"/>
+            <path d="M100 88 Q120 84 138 90 L138 136 Q120 130 100 133 Z" fill="url(#bG)" stroke="#7aa0cc" stroke-width="1"/>
+            <path d="M62 136 Q81 145 100 142 Q119 145 138 136" fill="none" stroke="#7aa0cc" stroke-width="1.5"/>
+            <line x1="68"  y1="100" x2="95"  y2="98"  stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <line x1="68"  y1="107" x2="95"  y2="105" stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <line x1="68"  y1="114" x2="95"  y2="112" stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <line x1="105" y1="98"  x2="132" y2="100" stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <line x1="105" y1="105" x2="132" y2="107" stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <line x1="105" y1="112" x2="132" y2="114" stroke="rgba(50,80,160,.3)" stroke-width="1"/>
+            <path d="M74 110 L89 126 L126 94" stroke="url(#cG)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#g2)"/>
+            <path d="M65 52 L100 40 L135 52 L100 64 Z" fill="url(#kG)" stroke="rgba(90,150,240,.4)" stroke-width="1.2"/>
+            <path d="M82 54 L82 70 Q82 78 100 80 Q118 78 118 70 L118 54" fill="url(#kG)" stroke="rgba(90,150,240,.4)" stroke-width="1.2"/>
+            <path d="M65 52 L100 40 L135 52 L100 64 Z" fill="none" stroke="rgba(160,200,255,.2)" stroke-width=".8"/>
+            <line x1="135" y1="52" x2="135" y2="68" stroke="#4a90d9" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="135" cy="71" r="4" fill="#4a90d9"/>
+            <text x="100" y="202" text-anchor="middle" font-family="'Exo 2', sans-serif" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="1.5">ONLINE EXAM</text>
+            <circle cx="22"  cy="195.5" r="3.5" fill="#1db87e" filter="url(#g2)"/>
+            <circle cx="150" cy="195.5" r="3.5" fill="#1db87e" filter="url(#g2)"/>
+            <text x="100" y="213" text-anchor="middle" font-family="'Exo 2', sans-serif" font-weight="600" font-size="11" fill="#5a7ab0" letter-spacing="6">SYSTEM</text>
+          </svg>
+
+        </div>
+
+        <div class="loading-dots">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <div class="loading-label">Đang tải hệ thống…</div>
+      </div>
+
+      <div class="ls-bottom-bar"></div>
+      <div class="ls-version">v3.0.1 · SECURE SESSION</div>
+    </div>
+    <!-- /#loading-screen -->
+
+    <!-- React app root -->
+    <div id="root"></div>
+    <div id="portal-root"></div>
+
+    <script>
+      /* ── Spawn particles ── */
+      const wrap = document.getElementById('ls-particles');
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'ls-particle';
+        const s = Math.random() * 3 + 1.5;
+        p.style.cssText = `
+          width:${s}px; height:${s}px;
+          left:${Math.random() * 100}%;
+          top:${30 + Math.random() * 65}%;
+          --d:${7 + Math.random() * 9}s;
+          animation-delay:${Math.random() * 9}s;
+          background:${Math.random() > .5 ? '#1db87e' : '#5ab4f0'};
+        `;
+        wrap.appendChild(p);
+      }
+    </script>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

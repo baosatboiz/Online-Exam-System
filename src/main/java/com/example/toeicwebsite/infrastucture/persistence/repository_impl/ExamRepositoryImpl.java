@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.infrastucture.persistence.repository_impl;
 
 import com.example.toeicwebsite.domain.exam.model.Exam;
+import com.example.toeicwebsite.domain.exam.model.ExamHeader;
 import com.example.toeicwebsite.domain.exam.model.ExamId;
 import com.example.toeicwebsite.domain.exam.repository.ExamRepository;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
@@ -41,10 +42,15 @@ public class ExamRepositoryImpl implements ExamRepository {
     }
 
     @Override
+    public List<ExamHeader> findAll() {
+        return jpaExamRepository.findAll().stream().map(examMapper::toHeader).toList();
+    }
+
+    @Override
     public Map<ExamId,Exam> findByBusinessIdIn(List<ExamId> ids) {
         List<UUID> examIds = ids.stream().map(ExamId::value).toList();
         return jpaExamRepository.findByBusinessIdIn(examIds)
                 .stream()
-                .collect(Collectors.toMap(e->new ExamId(e.getBusinessId()), examMapper::toDomain));
+                .collect(Collectors.toMap(e->new ExamId(e.getBusinessId()), examMapper::toCompactDomain));
     }
 }

@@ -1,0 +1,2 @@
+ALTER TABLE exam_schedules
+ADD COLUMN part_number INTEGER DEFAULT NULL;

@@ -1,42 +1,51 @@
 package com.example.toeicwebsite.domain.exam_attempt.model;
 import com.example.toeicwebsite.domain.exam.model.*;
+import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistration;
+import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistrationId;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamSchedule;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import com.example.toeicwebsite.domain.user.model.User;
+import com.example.toeicwebsite.domain.user.model.UserId;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter @Setter
 public class ExamAttempt {
     private ExamAttemptId id;
     private ExamScheduleId examScheduleId;
+    private UserId userId;
     private Instant startedAt;
     private Instant mustFinishedAt;
     private Instant finishedAt;
     private ExamStatus status;
     private Map<Long, ChoiceKey> answers = new HashMap<>();
     private Score score;
+    private ExamRegistrationId registrationId;
 
     public ExamAttempt() {
     }
 
-    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, Integer duration, Instant startedAt){
-        if(!examSchedule.canStart(startedAt)) throw new BusinessRuleException("Exam is not open");
+    public ExamAttempt(ExamAttemptId examAttemptId, ExamSchedule examSchedule, User user, Integer duration, Instant startedAt, Optional<ExamRegistration> registration){
+        examSchedule.canStart(user.getUserId(),registration,startedAt);
         this.examScheduleId = examSchedule.id();
+        this.userId = user.getUserId();
         this.id = examAttemptId;
         this.startedAt = startedAt;
+        this.registrationId = registration.map(ExamRegistration::getExamRegistrationId).orElse(null);
         mustFinishedAt = examSchedule.calculateMustFinishedAt(startedAt,duration);
         this.status = ExamStatus.IN_PROGRESS;
     }
-    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule,Integer duration,Instant now){
-       return new ExamAttempt(examAttemptId,examSchedule,duration,now);
+    public static ExamAttempt start(ExamAttemptId examAttemptId,ExamSchedule examSchedule, User user, Integer duration,Instant now, Optional<ExamRegistration> registration){
+       return new ExamAttempt(examAttemptId,examSchedule, user, duration,now,registration);
     }
     public void answer(Long questionId,ChoiceKey choiceKey,Instant now){
         isInProgress(now);

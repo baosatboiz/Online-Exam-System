@@ -10,5 +10,6 @@ import java.util.List;
 public interface AuthPort {
     void authenticate(String email,String password);
     String generateToken(String email, List<Role> roles);
+    String generateToken(String email,List<Role> roles,String picture);
     String encodePassword(String password);
 }

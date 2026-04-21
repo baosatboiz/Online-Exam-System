@@ -26,7 +26,11 @@ public class ExamAttemptEntity {
     @Column(name = "business_id", nullable = false, unique = true)
     private UUID businessId;
 
-    private String userId;
+//    private String userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_schedule_id", nullable = false)

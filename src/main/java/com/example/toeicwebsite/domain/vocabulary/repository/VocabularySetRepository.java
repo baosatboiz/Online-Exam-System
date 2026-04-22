@@ -11,4 +11,5 @@ public interface VocabularySetRepository {
     VocabularySet save(VocabularySet set);
     List<VocabularySet> findByUserId(UserId userId);
     Optional<VocabularySet> findByIdAndUserId(VocabularySetId setId, UserId userId);
+    void delete(VocabularySetId setId);
 }

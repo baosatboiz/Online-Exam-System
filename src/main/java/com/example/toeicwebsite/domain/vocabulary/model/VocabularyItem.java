@@ -39,6 +39,12 @@ public class VocabularyItem {
         return new VocabularyItem(VocabularyItemId.newId(),setId,userId,term,normalizeTerm(term),meaning,note,example,null,null);
     }
 
+    public VocabularyItem update(String term, String meaning, String note, String example) {
+        return new VocabularyItem(this.vocabularyItemId, this.vocabularySetId, this.userId, 
+                                  term, normalizeTerm(term), meaning, note, example, 
+                                  this.createdAt, Instant.now());
+    }
+
     public static String normalizeTerm(String term) {
         return term == null ? "" : term.trim().toLowerCase(Locale.ROOT);
     }

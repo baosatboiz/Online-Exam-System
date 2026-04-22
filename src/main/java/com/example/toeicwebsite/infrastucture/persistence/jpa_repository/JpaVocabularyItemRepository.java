@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface JpaVocabularyItemRepository extends JpaRepository<VocabularyItemEntity, UUID> {
     List<VocabularyItemEntity> findBySetIdAndUserIdOrderByCreatedAtDesc(UUID setId, UUID userId);
     long countBySetIdAndUserId(UUID setId, UUID userId);
+    Optional<VocabularyItemEntity> findByIdAndUserId(UUID id, UUID userId);
 
     @Query("""
             select v.setId as setId, count(v.id) as itemCount

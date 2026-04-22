@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import NavBar from "../NavBar";
 import fetchData from "../fetch/fetchData";
+import "./index.css";
 
 const emptyItem = () => ({ term: "", meaning: "", note: "", example: "" });
 
@@ -18,6 +19,12 @@ export default function MyVocabulary() {
   });
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSetId, setEditingSetId] = useState("");
+  const [editForm, setEditForm] = useState({ name: "", description: "", items: [] });
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const selectedSet = useMemo(
     () => sets.find((set) => set.setId === selectedSetId),
@@ -124,6 +131,112 @@ export default function MyVocabulary() {
     }
   };
 
+  const openEditModal = async (set) => {
+    setEditingSetId(set.setId);
+    setEditLoading(true);
+    try {
+      const itemsData = await fetchData(`/api/vocabulary/sets/${set.setId}/items`);
+      const formattedItems = (itemsData || []).map((item) => ({
+        itemId: item.itemId,
+        term: item.term,
+        meaning: item.meaning,
+        note: item.note || "",
+        example: item.example || "",
+        isNew: false,
+      }));
+      setEditForm({
+        name: set.name,
+        description: set.description || "",
+        items: formattedItems,
+      });
+    } catch (error) {
+      console.log(error);
+      setEditForm({
+        name: set.name,
+        description: set.description || "",
+        items: [],
+      });
+    } finally {
+      setEditLoading(false);
+      setShowEditModal(true);
+    }
+  };
+
+  const updateEditItemField = (index, field, value) => {
+    setEditForm((prev) => ({
+      ...prev,
+      items: prev.items.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const addEditItemRow = () => {
+    setEditForm((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        { term: "", meaning: "", note: "", example: "", isNew: true },
+      ],
+    }));
+  };
+
+  const removeEditItemRow = (index) => {
+    setEditForm((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
+  const handleUpdateSet = async (event) => {
+    event.preventDefault();
+    if (!editForm.name.trim()) {
+      setSubmitError("Tên bộ từ không được để trống");
+      return;
+    }
+
+    setEditLoading(true);
+    try {
+      const payload = {
+        name: editForm.name,
+        description: editForm.description,
+        items: editForm.items || [],
+      };
+      await fetchData(`/api/vocabulary/sets/${editingSetId}/with-items`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      await loadSets();
+      await loadItems(editingSetId);
+      setShowEditModal(false);
+      setSubmitMessage("Cập nhật bộ từ thành công");
+    } catch (error) {
+      setSubmitError(error.message || "Cập nhật bộ từ thất bại");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleDeleteSet = async (setId) => {
+    setDeleteLoading(true);
+    try {
+      await fetchData(`/api/vocabulary/sets/${setId}`, {
+        method: "DELETE",
+      });
+      if (selectedSetId === setId) {
+        setSelectedSetId("");
+        setItems([]);
+      }
+      await loadSets();
+      setDeleteConfirm(null);
+      setSubmitMessage("Xóa bộ từ thành công");
+    } catch (error) {
+      setSubmitError(error.message || "Xóa bộ từ thất bại");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="min-vh-100 bg-light">
       <NavBar />
@@ -144,6 +257,190 @@ export default function MyVocabulary() {
 
         {submitMessage && <div className="alert alert-success">{submitMessage}</div>}
         {submitError && <div className="alert alert-danger">{submitError}</div>}
+
+        {showEditModal && (
+          <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+            <div className="modal-dialog modal-dialog-centered modal-xl">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Sửa bộ từ</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditModal(false)}
+                  ></button>
+                </div>
+                <form onSubmit={handleUpdateSet}>
+                  <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+                    <div className="mb-3">
+                      <label className="form-label">Tên bộ từ</label>
+                      <input
+                        className="form-control"
+                        value={editForm.name}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, name: e.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Mô tả</label>
+                      <textarea
+                        className="form-control"
+                        value={editForm.description}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                        }
+                        rows={2}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <label className="form-label m-0">Từ vựng ({editForm.items?.length || 0})</label>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-success"
+                          onClick={addEditItemRow}
+                        >
+                          + Thêm từ
+                        </button>
+                      </div>
+                      <div style={{ overflowX: "auto" }}>
+                        <table className="table table-sm table-bordered">
+                          <thead className="table-light">
+                            <tr>
+                              <th style={{ width: "25%" }}>Từ vựng</th>
+                              <th style={{ width: "25%" }}>Nghĩa</th>
+                              <th style={{ width: "20%" }}>Ghi chú</th>
+                              <th style={{ width: "20%" }}>Ví dụ</th>
+                              <th style={{ width: "10%" }}>Hành động</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(editForm.items || []).map((item, index) => (
+                              <tr key={index}>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    value={item.term}
+                                    onChange={(e) =>
+                                      updateEditItemField(index, "term", e.target.value)
+                                    }
+                                    placeholder="Nhập từ"
+                                    required
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    value={item.meaning}
+                                    onChange={(e) =>
+                                      updateEditItemField(index, "meaning", e.target.value)
+                                    }
+                                    placeholder="Nhập nghĩa"
+                                    required
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    value={item.note}
+                                    onChange={(e) =>
+                                      updateEditItemField(index, "note", e.target.value)
+                                    }
+                                    placeholder="Ghi chú"
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    value={item.example}
+                                    onChange={(e) =>
+                                      updateEditItemField(index, "example", e.target.value)
+                                    }
+                                    placeholder="Ví dụ"
+                                  />
+                                </td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-danger"
+                                    onClick={() => removeEditItemRow(index)}
+                                  >
+                                    Xóa
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowEditModal(false)}
+                      disabled={editLoading}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={editLoading}
+                    >
+                      {editLoading ? "Đang lưu..." : "Lưu"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {deleteConfirm && (
+          <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Xác nhận xóa</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setDeleteConfirm(null)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p>Bạn có chắc muốn xóa bộ từ "{deleteConfirm.name}"? Hành động này không thể hoàn tác.</p>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setDeleteConfirm(null)}
+                    disabled={deleteLoading}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteSet(deleteConfirm.setId)}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? "Đang xóa..." : "Xóa"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showCreateForm && (
           <div className="card shadow-sm border-0 mb-4">
@@ -242,18 +539,38 @@ export default function MyVocabulary() {
                 ) : (
                   <div className="list-group">
                     {sets.map((set) => (
-                      <button
+                      <div
                         key={set.setId}
-                        type="button"
-                        className={`list-group-item list-group-item-action ${selectedSetId === set.setId ? "active" : ""}`}
-                        onClick={() => setSelectedSetId(set.setId)}
+                        className={`list-group-item ${selectedSetId === set.setId ? "active" : ""}`}
                       >
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="fw-bold">{set.name}</span>
-                          <span className="badge bg-secondary">{set.itemCount}</span>
+                        <button
+                          type="button"
+                          className={`w-100 text-start border-0 bg-transparent ${selectedSetId === set.setId ? "" : "text-dark"}`}
+                          onClick={() => setSelectedSetId(set.setId)}
+                        >
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="fw-bold">{set.name}</span>
+                            <span className="badge bg-secondary">{set.itemCount}</span>
+                          </div>
+                          {set.description && <small>{set.description}</small>}
+                        </button>
+                        <div className="mt-2 d-flex gap-2">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => openEditModal(set)}
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => setDeleteConfirm(set)}
+                          >
+                            Xóa
+                          </button>
                         </div>
-                        {set.description && <small>{set.description}</small>}
-                      </button>
+                      </div>
                     ))}
                   </div>
                 )}

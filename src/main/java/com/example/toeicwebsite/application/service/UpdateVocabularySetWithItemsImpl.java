@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -34,9 +35,10 @@ public class UpdateVocabularySetWithItemsImpl implements UpdateVocabularySetWith
 
         List<VocabularyItem> currentItems = vocabularyItemRepository.findBySetIdAndUserId(command.setId(), command.userId());
         Map<String, VocabularyItem> currentItemsById = currentItems.stream()
-            .collect(HashMap::new,
-                (map, item) -> map.put(item.getVocabularyItemId().value().toString(), item),
-                HashMap::putAll);
+                                                        .collect(Collectors.toMap(
+                                                            item -> item.getVocabularyItemId().value().toString(),
+                                                            item -> item
+                                                        ));
 
         List<VocabularyItem> items = new ArrayList<>();
         Set<String> incomingItemIds = new HashSet<>();

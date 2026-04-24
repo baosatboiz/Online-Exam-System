@@ -7,7 +7,6 @@ import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetReposi
 import com.example.toeicwebsite.infrastucture.persistence.entity.VocabularySetEntity;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaVocabularySetRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.VocabularySetMapper;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,13 +18,12 @@ import java.util.Optional;
 public class VocabularySetRepositoryImpl implements VocabularySetRepository {
     private final JpaVocabularySetRepository jpaVocabularySetRepository;
     private final VocabularySetMapper vocabularySetMapper;
-    private final EntityManager entityManager;
 
     @Override
     public VocabularySet save(VocabularySet set) {
         VocabularySetEntity entity = vocabularySetMapper.toEntity(set);
-        VocabularySetEntity managed = isNew(set) ? persist(entity) : entityManager.merge(entity);
-        return vocabularySetMapper.toDomain(managed);
+        VocabularySetEntity saved = jpaVocabularySetRepository.save(entity);
+        return vocabularySetMapper.toDomain(saved);
     }
 
     @Override
@@ -44,14 +42,5 @@ public class VocabularySetRepositoryImpl implements VocabularySetRepository {
     @Override
     public void delete(VocabularySetId setId) {
         jpaVocabularySetRepository.deleteById(setId.value());
-    }
-
-    private boolean isNew(VocabularySet set) {
-        return set.getCreatedAt() == null;
-    }
-
-    private VocabularySetEntity persist(VocabularySetEntity entity) {
-        entityManager.persist(entity);
-        return entity;
     }
 }

@@ -2,3 +2,125 @@
   background-color: #e0e9eb !important;
   border-color: #e0e9eb !important;
 }
+
+.flashcard-shell {
+  background: linear-gradient(145deg, #f8fafc 0%, #eef4ff 100%);
+}
+
+.flashcard-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.flashcard-card {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  transform-style: preserve-3d;
+  transition: transform 0.45s ease;
+}
+
+.flashcard-card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.09);
+}
+
+.flashcard-front {
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.flashcard-back {
+  background: #0f172a;
+  color: #f8fafc;
+  transform: rotateY(180deg);
+}
+
+.flashcard-note {
+  border-left: 3px solid #64748b;
+  padding-left: 10px;
+}
+
+.matching-shell {
+  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+}
+
+.matching-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.matching-card {
+  min-height: 88px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.matching-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(120, 53, 15, 0.12);
+}
+
+.matching-card.is-selected {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+}
+
+.matching-tag {
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #ffedd5;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.quiz-question-box {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+@media (max-width: 576px) {
+  .flashcard-card {
+    min-height: 190px;
+  }
+
+  .flashcard-face {
+    padding: 16px;
+  }
+
+  .flashcard-face h4 {
+    font-size: 1.1rem;
+  }
+
+  .matching-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

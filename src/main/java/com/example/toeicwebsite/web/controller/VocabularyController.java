@@ -4,6 +4,7 @@ import com.example.toeicwebsite.application.command.AddVocabularyItemCommand;
 import com.example.toeicwebsite.application.command.CreateVocabularySetCommand;
 import com.example.toeicwebsite.application.command.CreateVocabularySetWithItemsCommand;
 import com.example.toeicwebsite.application.command.DeleteVocabularySetCommand;
+import com.example.toeicwebsite.application.command.UpdateVocabularyItemCommand;
 import com.example.toeicwebsite.application.command.UpdateVocabularySetWithItemsCommand;
 import com.example.toeicwebsite.application.query.GetVocabularyItemsBySetQuery;
 import com.example.toeicwebsite.application.query.GetVocabularySetsQuery;
@@ -16,13 +17,16 @@ import com.example.toeicwebsite.application.usecase.CreateVocabularySetWithItems
 import com.example.toeicwebsite.application.usecase.DeleteVocabularySet;
 import com.example.toeicwebsite.application.usecase.GetVocabularyItemsBySet;
 import com.example.toeicwebsite.application.usecase.GetVocabularySets;
+import com.example.toeicwebsite.application.usecase.UpdateVocabularyItem;
 import com.example.toeicwebsite.application.usecase.UpdateVocabularySetWithItems;
 import com.example.toeicwebsite.domain.user.model.UserId;
+import com.example.toeicwebsite.domain.vocabulary.model.VocabularyItemId;
 import com.example.toeicwebsite.domain.vocabulary.model.VocabularySetId;
 import com.example.toeicwebsite.infrastucture.security.config.SecurityUser;
 import com.example.toeicwebsite.web.dto.vocabulary.request.AddVocabularyItemRequest;
 import com.example.toeicwebsite.web.dto.vocabulary.request.CreateVocabularySetRequest;
 import com.example.toeicwebsite.web.dto.vocabulary.request.CreateVocabularySetWithItemsRequest;
+import com.example.toeicwebsite.web.dto.vocabulary.request.UpdateVocabularyItemRequest;
 import com.example.toeicwebsite.web.dto.vocabulary.request.UpdateVocabularySetWithItemsRequest;
 import com.example.toeicwebsite.web.dto.vocabulary.response.CreateVocabularySetWithItemsResponse;
 import com.example.toeicwebsite.web.dto.vocabulary.response.VocabularyItemResponse;
@@ -52,6 +56,7 @@ public class VocabularyController {
     private final CreateVocabularySetWithItems createVocabularySetWithItems;
     private final GetVocabularySets getVocabularySets;
     private final GetVocabularyItemsBySet getVocabularyItemsBySet;
+        private final UpdateVocabularyItem updateVocabularyItem;
     private final UpdateVocabularySetWithItems updateVocabularySetWithItems;
     private final DeleteVocabularySet deleteVocabularySet;
 
@@ -146,6 +151,32 @@ public class VocabularyController {
         VocabularyItemResult item = addVocabularyItem.execute(new AddVocabularyItemCommand(
                 userId,
                 new VocabularySetId(setId),
+                request.term(),
+                request.meaning(),
+                request.note(),
+                request.example()
+        ));
+        return ResponseEntity.ok(new VocabularyItemResponse(
+                item.itemId().value(),
+                item.term(),
+                item.meaning(),
+                item.note(),
+                item.example(),
+                item.createdAt(),
+                item.updatedAt()
+        ));
+    }
+
+    @PutMapping("/sets/{setId}/items/{itemId}")
+    public ResponseEntity<VocabularyItemResponse> updateItem(@PathVariable UUID setId,
+                                                             @PathVariable UUID itemId,
+                                                             @RequestBody @Valid UpdateVocabularyItemRequest request,
+                                                             @AuthenticationPrincipal SecurityUser securityUser) {
+        UserId userId = securityUser.getUser().getUserId();
+        VocabularyItemResult item = updateVocabularyItem.execute(new UpdateVocabularyItemCommand(
+                userId,
+                new VocabularySetId(setId),
+                new VocabularyItemId(itemId),
                 request.term(),
                 request.meaning(),
                 request.note(),

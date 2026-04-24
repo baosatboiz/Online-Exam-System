@@ -1,9 +1,73 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NavBar from "../NavBar";
 import fetchData from "../fetch/fetchData";
 import "./index.css";
 
 const emptyItem = () => ({ term: "", meaning: "", note: "", example: "" });
+const MAX_MATCH_ITEMS = 6;
+const MAX_QUIZ_OPTIONS = 4;
+
+const shuffleArray = (arr) => {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
+
+const isSameOrder = (a, b) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every((value, index) => value === b[index]);
+};
+
+const buildMatchingCards = (sourceItems) => {
+  const chosenItems = shuffleArray(sourceItems).slice(0, MAX_MATCH_ITEMS);
+  const cards = chosenItems.flatMap((item) => [
+    {
+      id: `${item.itemId}-term`,
+      pairId: item.itemId,
+      type: "term",
+      text: item.term,
+    },
+    {
+      id: `${item.itemId}-meaning`,
+      pairId: item.itemId,
+      type: "meaning",
+      text: item.meaning,
+    },
+  ]);
+  return shuffleArray(cards);
+};
+
+const normalizeMeaning = (meaning) => (meaning || "").trim().toLowerCase();
+
+const buildQuizOptions = (currentItem, sourceItems) => {
+  if (!currentItem) {
+    return [];
+  }
+
+  const correctMeaning = currentItem.meaning;
+  const seen = new Set([normalizeMeaning(correctMeaning)]);
+  const wrongMeanings = shuffleArray(
+    sourceItems
+      .filter((item) => item.itemId !== currentItem.itemId)
+      .map((item) => item.meaning)
+      .filter((meaning) => {
+        const normalized = normalizeMeaning(meaning);
+        if (!normalized || seen.has(normalized)) {
+          return false;
+        }
+        seen.add(normalized);
+        return true;
+      })
+  );
+
+  const options = [correctMeaning, ...wrongMeanings].slice(0, MAX_QUIZ_OPTIONS);
+  return shuffleArray(options);
+};
 
 export default function MyVocabulary() {
   const [sets, setSets] = useState([]);
@@ -25,20 +89,61 @@ export default function MyVocabulary() {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [setSearchKeyword, setSetSearchKeyword] = useState("");
+  const [learningMode, setLearningMode] = useState("list");
+  const [flashMode, setFlashMode] = useState("en");
+  const [flashOrder, setFlashOrder] = useState([]);
+  const [flashIndex, setFlashIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [matchingCards, setMatchingCards] = useState([]);
+  const [selectedMatchingCards, setSelectedMatchingCards] = useState([]);
+  const [matchedMatchingCards, setMatchedMatchingCards] = useState([]);
+  const [matchingBusy, setMatchingBusy] = useState(false);
+  const [quizOrder, setQuizOrder] = useState([]);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizOptions, setQuizOptions] = useState([]);
+  const [quizSelectedAnswer, setQuizSelectedAnswer] = useState("");
+  const [quizFeedback, setQuizFeedback] = useState(null);
+  const [showEditItemModal, setShowEditItemModal] = useState(false);
+  const [editingItemId, setEditingItemId] = useState("");
+  const [editItemForm, setEditItemForm] = useState({ term: "", meaning: "", note: "", example: "" });
+  const [editItemLoading, setEditItemLoading] = useState(false);
+  const matchingTimerRef = useRef(null);
 
   const selectedSet = useMemo(
     () => sets.find((set) => set.setId === selectedSetId),
     [sets, selectedSetId]
   );
 
+  const filteredSets = useMemo(() => {
+    const keyword = setSearchKeyword.trim().toLowerCase();
+    if (!keyword) {
+      return sets;
+    }
+    return sets.filter((set) => (set.name || "").toLowerCase().includes(keyword));
+  }, [sets, setSearchKeyword]);
+
+  const currentFlashItem = useMemo(() => {
+    if (!items.length || !flashOrder.length) {
+      return null;
+    }
+    const itemIndex = flashOrder[flashIndex] ?? flashOrder[0];
+    return items[itemIndex] || null;
+  }, [items, flashOrder, flashIndex]);
+
+  const currentQuizItem = useMemo(() => {
+    if (!items.length || !quizOrder.length) {
+      return null;
+    }
+    const itemIndex = quizOrder[quizIndex] ?? quizOrder[0];
+    return items[itemIndex] || null;
+  }, [items, quizOrder, quizIndex]);
+
   const loadSets = async () => {
     setLoadingSets(true);
     try {
       const data = await fetchData("/api/vocabulary/sets");
       setSets(data || []);
-      if ((data || []).length > 0 && !selectedSetId) {
-        setSelectedSetId(data[0].setId);
-      }
     } catch (error) {
       console.log(error);
       setSets([]);
@@ -71,6 +176,32 @@ export default function MyVocabulary() {
   useEffect(() => {
     loadItems(selectedSetId);
   }, [selectedSetId]);
+
+  useEffect(() => {
+    const defaultOrder = items.map((_, index) => index);
+    setFlashOrder(defaultOrder);
+    setFlashIndex(0);
+    setIsFlipped(false);
+    setMatchingCards(buildMatchingCards(items));
+    setSelectedMatchingCards([]);
+    setMatchedMatchingCards([]);
+    setMatchingBusy(false);
+    const newQuizOrder = shuffleArray(defaultOrder);
+    setQuizOrder(newQuizOrder);
+    setQuizIndex(0);
+    setQuizSelectedAnswer("");
+    setQuizFeedback(null);
+    const firstQuizItem = items[newQuizOrder[0]];
+    setQuizOptions(buildQuizOptions(firstQuizItem, items));
+  }, [items]);
+
+  useEffect(() => {
+    return () => {
+      if (matchingTimerRef.current) {
+        clearTimeout(matchingTimerRef.current);
+      }
+    };
+  }, []);
 
   const updateItemField = (index, field, value) => {
     setForm((prev) => ({
@@ -117,8 +248,7 @@ export default function MyVocabulary() {
         body: JSON.stringify(payload),
       });
       await loadSets();
-      setSelectedSetId(result.setId);
-      await loadItems(result.setId);
+      setSelectedSetId("");
       setSubmitMessage(
         result.skippedTerms?.length
           ? `Tạo thành công. Bỏ qua từ trùng: ${result.skippedTerms.join(", ")}`
@@ -236,6 +366,191 @@ export default function MyVocabulary() {
       setDeleteLoading(false);
     }
   };
+
+  const moveToNextFlashcard = () => {
+    if (!flashOrder.length) {
+      return;
+    }
+    setFlashIndex((prev) => (prev + 1) % flashOrder.length);
+    setIsFlipped(false);
+  };
+
+  const moveToPrevFlashcard = () => {
+    if (!flashOrder.length) {
+      return;
+    }
+    setFlashIndex((prev) => (prev - 1 + flashOrder.length) % flashOrder.length);
+    setIsFlipped(false);
+  };
+
+  const shuffleFlashcards = () => {
+    if (items.length <= 1) {
+      return;
+    }
+
+    const original = items.map((_, index) => index);
+    let shuffled = shuffleArray(original);
+    let retries = 0;
+
+    while (isSameOrder(original, shuffled) && retries < 5) {
+      shuffled = shuffleArray(original);
+      retries += 1;
+    }
+
+    setFlashOrder(shuffled);
+    setFlashIndex(0);
+    setIsFlipped(false);
+  };
+
+  const resetFlashOrder = () => {
+    setFlashOrder(items.map((_, index) => index));
+    setFlashIndex(0);
+    setIsFlipped(false);
+  };
+
+  const resetMatchingGame = () => {
+    if (matchingTimerRef.current) {
+      clearTimeout(matchingTimerRef.current);
+    }
+    setMatchingCards(buildMatchingCards(items));
+    setSelectedMatchingCards([]);
+    setMatchedMatchingCards([]);
+    setMatchingBusy(false);
+  };
+
+  const resetQuizGame = () => {
+    const order = shuffleArray(items.map((_, index) => index));
+    setQuizOrder(order);
+    setQuizIndex(0);
+    setQuizSelectedAnswer("");
+    setQuizFeedback(null);
+    const firstQuizItem = items[order[0]];
+    setQuizOptions(buildQuizOptions(firstQuizItem, items));
+  };
+
+  const answerQuizQuestion = (answer) => {
+    if (!currentQuizItem || quizSelectedAnswer) {
+      return;
+    }
+
+    setQuizSelectedAnswer(answer);
+
+    if (answer === currentQuizItem.meaning) {
+      setQuizFeedback({
+        type: "success",
+        message: "Đáp án chính xác",
+      });
+      return;
+    }
+
+    setQuizFeedback({
+      type: "danger",
+      message: `Trả lời sai. Đáp án đúng: ${currentQuizItem.meaning}`,
+    });
+  };
+
+  const nextQuizQuestion = () => {
+    if (!quizOrder.length) {
+      return;
+    }
+
+    const nextIndex = (quizIndex + 1) % quizOrder.length;
+    const nextQuizItem = items[quizOrder[nextIndex]];
+    setQuizIndex(nextIndex);
+    setQuizSelectedAnswer("");
+    setQuizFeedback(null);
+    setQuizOptions(buildQuizOptions(nextQuizItem, items));
+  };
+
+  const openEditItemModal = (item) => {
+    setEditingItemId(item.itemId);
+    setEditItemForm({
+      term: item.term || "",
+      meaning: item.meaning || "",
+      note: item.note || "",
+      example: item.example || "",
+    });
+    setShowEditItemModal(true);
+  };
+
+  const handleUpdateSingleItem = async (event) => {
+    event.preventDefault();
+    if (!selectedSetId || !selectedSet) {
+      return;
+    }
+    if (!editItemForm.term.trim() || !editItemForm.meaning.trim()) {
+      setSubmitError("Term và Meaning không được để trống");
+      return;
+    }
+
+    setEditItemLoading(true);
+    setSubmitMessage("");
+    setSubmitError("");
+
+    try {
+      const result = await fetchData(`/api/vocabulary/sets/${selectedSetId}/items/${editingItemId}`, {
+        method: "PUT",
+        body: JSON.stringify(editItemForm),
+      });
+
+      await loadItems(selectedSetId);
+      await loadSets();
+      setShowEditItemModal(false);
+      setEditingItemId("");
+      setSubmitMessage(result?.term ? `Cập nhật từ vựng thành công: ${result.term}` : "Cập nhật từ vựng thành công");
+    } catch (error) {
+      setSubmitError(error.message || "Cập nhật từ vựng thất bại");
+    } finally {
+      setEditItemLoading(false);
+    }
+  };
+
+  const handleMatchingCardClick = (cardId) => {
+    if (matchingBusy || matchedMatchingCards.includes(cardId) || selectedMatchingCards.includes(cardId)) {
+      return;
+    }
+
+    if (selectedMatchingCards.length === 0) {
+      setSelectedMatchingCards([cardId]);
+      return;
+    }
+
+    const firstCardId = selectedMatchingCards[0];
+    const secondCardId = cardId;
+    const firstCard = matchingCards.find((card) => card.id === firstCardId);
+    const secondCard = matchingCards.find((card) => card.id === secondCardId);
+
+    if (!firstCard || !secondCard) {
+      setSelectedMatchingCards([]);
+      return;
+    }
+
+    const isMatched =
+      firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type;
+
+    setSelectedMatchingCards([firstCardId, secondCardId]);
+    setMatchingBusy(true);
+
+    if (matchingTimerRef.current) {
+      clearTimeout(matchingTimerRef.current);
+    }
+
+    matchingTimerRef.current = setTimeout(() => {
+      if (isMatched) {
+        setMatchedMatchingCards((prev) => [...prev, firstCardId, secondCardId]);
+      }
+      setSelectedMatchingCards([]);
+      setMatchingBusy(false);
+    }, isMatched ? 260 : 700);
+  };
+
+  const matchingCompleted =
+    matchingCards.length > 0 && matchedMatchingCards.length === matchingCards.length;
+
+  const frontText =
+    flashMode === "en" ? currentFlashItem?.term || "" : currentFlashItem?.meaning || "";
+  const backText =
+    flashMode === "en" ? currentFlashItem?.meaning || "" : currentFlashItem?.term || "";
 
   return (
     <div className="min-vh-100 bg-light">
@@ -404,6 +719,90 @@ export default function MyVocabulary() {
           </div>
         )}
 
+        {showEditItemModal && (
+          <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Sửa từ vựng</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditItemModal(false)}
+                  ></button>
+                </div>
+                <form onSubmit={handleUpdateSingleItem}>
+                  <div className="modal-body d-grid gap-3">
+                    <div>
+                      <label className="form-label">Term</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editItemForm.term}
+                        onChange={(event) =>
+                          setEditItemForm((prev) => ({ ...prev, term: event.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Meaning</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editItemForm.meaning}
+                        onChange={(event) =>
+                          setEditItemForm((prev) => ({ ...prev, meaning: event.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Note</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editItemForm.note}
+                        onChange={(event) =>
+                          setEditItemForm((prev) => ({ ...prev, note: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Example</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editItemForm.example}
+                        onChange={(event) =>
+                          setEditItemForm((prev) => ({ ...prev, example: event.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowEditItemModal(false)}
+                      disabled={editItemLoading}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={editItemLoading}
+                    >
+                      {editItemLoading ? "Đang lưu..." : "Lưu"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
         {deleteConfirm && (
           <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -528,17 +927,28 @@ export default function MyVocabulary() {
         )}
 
         <div className="row g-3">
-          <div className="col-lg-4">
+          <div className={selectedSetId ? "col-lg-4" : "col-12"}>
             <div className="card shadow-sm border-0 h-100">
               <div className="card-body">
                 <h5 className="fw-bold">Bộ từ của bạn</h5>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Tìm theo tên bộ từ..."
+                    value={setSearchKeyword}
+                    onChange={(event) => setSetSearchKeyword(event.target.value)}
+                  />
+                </div>
                 {loadingSets ? (
                   <p className="text-muted">Đang tải...</p>
                 ) : sets.length === 0 ? (
                   <p className="text-muted">Chưa có bộ từ nào.</p>
+                ) : filteredSets.length === 0 ? (
+                  <p className="text-muted">Không tìm thấy bộ từ phù hợp.</p>
                 ) : (
                   <div className="list-group">
-                    {sets.map((set) => (
+                    {filteredSets.map((set) => (
                       <div
                         key={set.setId}
                         className={`list-group-item ${selectedSetId === set.setId ? "active" : ""}`}
@@ -546,7 +956,10 @@ export default function MyVocabulary() {
                         <button
                           type="button"
                           className={`w-100 text-start border-0 bg-transparent ${selectedSetId === set.setId ? "" : "text-dark"}`}
-                          onClick={() => setSelectedSetId(set.setId)}
+                          onClick={() => {
+                            setSelectedSetId(set.setId);
+                            setLearningMode("list");
+                          }}
                         >
                           <div className="d-flex justify-content-between align-items-center">
                             <span className="fw-bold">{set.name}</span>
@@ -578,43 +991,314 @@ export default function MyVocabulary() {
             </div>
           </div>
 
-          <div className="col-lg-8">
-            <div className="card shadow-sm border-0 h-100">
-              <div className="card-body">
-                <h5 className="fw-bold mb-3">{selectedSet ? selectedSet.name : "Danh sách từ"}</h5>
-                {loadingItems ? (
-                  <p className="text-muted">Đang tải từ vựng...</p>
-                ) : !selectedSetId ? (
-                  <p className="text-muted">Hãy chọn một bộ từ.</p>
-                ) : items.length === 0 ? (
-                  <p className="text-muted">Bộ từ này chưa có item.</p>
-                ) : (
-                  <div className="table-responsive">
-                    <table className="table table-striped">
-                      <thead>
-                        <tr>
-                          <th>Term</th>
-                          <th>Meaning</th>
-                          <th>Note</th>
-                          <th>Example</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items.map((item) => (
-                          <tr key={item.itemId}>
-                            <td className="fw-semibold">{item.term}</td>
-                            <td>{item.meaning}</td>
-                            <td>{item.note || "-"}</td>
-                            <td>{item.example || "-"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+          {selectedSetId && (
+            <div className="col-lg-8">
+              <div className="card shadow-sm border-0 h-100">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-bold m-0">{selectedSet ? selectedSet.name : "Chi tiết bộ từ"}</h5>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => {
+                        setSelectedSetId("");
+                        setItems([]);
+                      }}
+                    >
+                      Quay lại danh sách bộ từ
+                    </button>
                   </div>
-                )}
+
+                  {loadingItems ? (
+                    <p className="text-muted">Đang tải từ vựng...</p>
+                  ) : items.length === 0 ? (
+                    <p className="text-muted">Bộ từ này chưa có item.</p>
+                  ) : (
+                    <div className="d-grid gap-3">
+                      <div className="d-flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${learningMode === "list" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setLearningMode("list")}
+                        >
+                          Danh sách từ
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${learningMode === "flashcard" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setLearningMode("flashcard")}
+                        >
+                          Chế độ 1: Flash card
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${learningMode === "matching" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => {
+                            setLearningMode("matching");
+                            resetMatchingGame();
+                          }}
+                        >
+                          Chế độ 2: Ghép thẻ
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${learningMode === "quiz" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => {
+                            setLearningMode("quiz");
+                            resetQuizGame();
+                          }}
+                        >
+                          Chế độ 3: Trắc nghiệm
+                        </button>
+                      </div>
+
+                      {learningMode === "list" && (
+                        <div className="table-responsive">
+                          <table className="table table-striped">
+                            <thead>
+                              <tr>
+                                <th>Term</th>
+                                <th>Meaning</th>
+                                <th>Note</th>
+                                <th>Example</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {items.map((item) => (
+                                <tr key={item.itemId}>
+                                  <td className="fw-semibold">{item.term}</td>
+                                  <td>{item.meaning}</td>
+                                  <td>{item.note || "-"}</td>
+                                  <td>{item.example || "-"}</td>
+                                  <td>
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm btn-outline-primary"
+                                      onClick={() => openEditItemModal(item)}
+                                    >
+                                      Sửa
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      {learningMode === "flashcard" && (
+                        <div className="flashcard-shell border rounded-3 p-3">
+                          <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                            <div className="btn-group" role="group" aria-label="Chọn mặt trước flashcard">
+                              <button
+                                type="button"
+                                className={`btn btn-sm ${flashMode === "en" ? "btn-primary" : "btn-outline-primary"}`}
+                                onClick={() => {
+                                  setFlashMode("en");
+                                  setIsFlipped(false);
+                                }}
+                              >
+                                Mặt trước English
+                              </button>
+                              <button
+                                type="button"
+                                className={`btn btn-sm ${flashMode === "vi" ? "btn-primary" : "btn-outline-primary"}`}
+                                onClick={() => {
+                                  setFlashMode("vi");
+                                  setIsFlipped(false);
+                                }}
+                              >
+                                Mặt trước Vietnamese
+                              </button>
+                            </div>
+                            <div className="d-flex gap-2">
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-dark"
+                                onClick={shuffleFlashcards}
+                              >
+                                Đảo thứ tự
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={resetFlashOrder}
+                              >
+                                Về thứ tự gốc
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flashcard-meta text-muted small mb-2">
+                            <span>
+                              Thẻ {flashOrder.length ? flashIndex + 1 : 0}/{flashOrder.length}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={`flashcard-card ${isFlipped ? "is-flipped" : ""}`}
+                            onClick={() => setIsFlipped((prev) => !prev)}
+                          >
+                            <div className="flashcard-face flashcard-front">
+                              <h4 className="m-0">{frontText}</h4>
+                            </div>
+                            <div className="flashcard-face flashcard-back">
+                              <h4 className="m-0">{backText}</h4>
+                            </div>
+                          </button>
+
+                          {(currentFlashItem?.note || currentFlashItem?.example) && (
+                            <div className="flashcard-note mt-3 small text-muted">
+                              {currentFlashItem?.note && <div>Note: {currentFlashItem.note}</div>}
+                              {currentFlashItem?.example && <div>Example: {currentFlashItem.example}</div>}
+                            </div>
+                          )}
+
+                          <div className="d-flex justify-content-between mt-3">
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary"
+                              onClick={moveToPrevFlashcard}
+                            >
+                              Trước
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={moveToNextFlashcard}
+                            >
+                              Tiếp theo
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {learningMode === "matching" && (
+                        <div className="matching-shell border rounded-3 p-3">
+                          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h6 className="fw-bold m-0">Chế độ ghép thẻ</h6>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-secondary"
+                              onClick={resetMatchingGame}
+                            >
+                              Chơi lại
+                            </button>
+                          </div>
+
+                          <div className="small text-muted mb-2">
+                            Đã ghép: {matchedMatchingCards.length / 2}/{matchingCards.length / 2}
+                          </div>
+
+                          {matchingCompleted && (
+                            <div className="alert alert-success py-2">
+                              Hoàn thành. Bạn đã ghép đúng tất cả thẻ.
+                            </div>
+                          )}
+
+                          <div className="matching-grid">
+                            {matchingCards
+                              .filter((card) => !matchedMatchingCards.includes(card.id))
+                              .map((card) => {
+                                const isSelected = selectedMatchingCards.includes(card.id);
+                                const cardTypeLabel = card.type === "term" ? "EN" : "VI";
+                                return (
+                                  <button
+                                    key={card.id}
+                                    type="button"
+                                    className={`matching-card ${isSelected ? "is-selected" : ""}`}
+                                    onClick={() => handleMatchingCardClick(card.id)}
+                                    disabled={matchingBusy}
+                                  >
+                                    <span className="matching-tag">{cardTypeLabel}</span>
+                                    <span>{card.text}</span>
+                                  </button>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+
+                      {learningMode === "quiz" && (
+                        <div className="border rounded-3 p-3 bg-white">
+                          {!currentQuizItem ? (
+                            <p className="text-muted m-0">Khong du du lieu de tao cau hoi.</p>
+                          ) : (
+                            <div className="d-grid gap-3">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <h6 className="fw-bold m-0">Cau hoi {quizIndex + 1}/{quizOrder.length}</h6>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-outline-secondary"
+                                  onClick={resetQuizGame}
+                                >
+                                  Trộn lại bộ câu hỏi
+                                </button>
+                              </div>
+
+                              <div className="quiz-question-box">
+                                <div className="text-muted small">Tu tieng Anh</div>
+                                <div className="fs-5 fw-semibold">{currentQuizItem.term}</div>
+                              </div>
+
+                              <div className="d-grid gap-2">
+                                {quizOptions.map((option, optionIndex) => {
+                                  const selected = quizSelectedAnswer === option;
+                                  const correct = option === currentQuizItem.meaning;
+                                  let optionClass = "btn-outline-primary";
+
+                                  if (quizSelectedAnswer) {
+                                    if (correct) {
+                                      optionClass = "btn-success";
+                                    } else if (selected) {
+                                      optionClass = "btn-danger";
+                                    } else {
+                                      optionClass = "btn-outline-secondary";
+                                    }
+                                  }
+
+                                  return (
+                                    <button
+                                      key={`${option}-${optionIndex}`}
+                                      type="button"
+                                      className={`btn text-start ${optionClass}`}
+                                      onClick={() => answerQuizQuestion(option)}
+                                      disabled={Boolean(quizSelectedAnswer)}
+                                    >
+                                      {option}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {quizFeedback && (
+                                <div className={`alert alert-${quizFeedback.type} py-2 m-0`}>
+                                  {quizFeedback.message}
+                                </div>
+                              )}
+
+                              <div className="d-flex justify-content-end">
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  onClick={nextQuizQuestion}
+                                  disabled={!quizSelectedAnswer}
+                                >
+                                  Cau tiep theo
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

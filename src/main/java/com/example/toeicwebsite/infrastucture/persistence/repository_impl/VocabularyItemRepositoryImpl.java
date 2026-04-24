@@ -8,7 +8,6 @@ import com.example.toeicwebsite.domain.vocabulary.repository.VocabularyItemRepos
 import com.example.toeicwebsite.infrastucture.persistence.entity.VocabularyItemEntity;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaVocabularyItemRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.VocabularyItemMapper;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -23,13 +22,12 @@ import java.util.stream.Collectors;
 public class VocabularyItemRepositoryImpl implements VocabularyItemRepository {
     private final JpaVocabularyItemRepository jpaVocabularyItemRepository;
     private final VocabularyItemMapper vocabularyItemMapper;
-    private final EntityManager entityManager;
 
     @Override
     public VocabularyItem save(VocabularyItem item) {
         VocabularyItemEntity entity = vocabularyItemMapper.toEntity(item);
-        VocabularyItemEntity managed = isNew(item) ? persist(entity) : entityManager.merge(entity);
-        return vocabularyItemMapper.toDomain(managed);
+        VocabularyItemEntity saved = jpaVocabularyItemRepository.save(entity);
+        return vocabularyItemMapper.toDomain(saved);
     }
 
     @Override
@@ -37,11 +35,13 @@ public class VocabularyItemRepositoryImpl implements VocabularyItemRepository {
         if (items == null || items.isEmpty()) {
             return List.of();
         }
-        return items.stream().map(item -> {
-            VocabularyItemEntity entity = vocabularyItemMapper.toEntity(item);
-            VocabularyItemEntity managed = isNew(item) ? persist(entity) : entityManager.merge(entity);
-            return vocabularyItemMapper.toDomain(managed);
-        }).toList();
+        List<VocabularyItemEntity> entities = items.stream()
+                .map(vocabularyItemMapper::toEntity)
+                .toList();
+        entities = jpaVocabularyItemRepository.saveAll(entities);
+        return entities.stream()                
+                .map(vocabularyItemMapper::toDomain)
+                .toList();        
     }
 
     @Override
@@ -89,14 +89,5 @@ public class VocabularyItemRepositoryImpl implements VocabularyItemRepository {
         }
         List<UUID> ids = itemIds.stream().map(VocabularyItemId::value).toList();
         jpaVocabularyItemRepository.deleteAllByIdInBatch(ids);
-    }
-
-    private boolean isNew(VocabularyItem item) {
-        return item.getCreatedAt() == null;
-    }
-
-    private VocabularyItemEntity persist(VocabularyItemEntity entity) {
-        entityManager.persist(entity);
-        return entity;
     }
 }

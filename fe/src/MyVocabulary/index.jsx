@@ -104,6 +104,8 @@ export default function MyVocabulary() {
   const [quizOptions, setQuizOptions] = useState([]);
   const [quizSelectedAnswer, setQuizSelectedAnswer] = useState("");
   const [quizFeedback, setQuizFeedback] = useState(null);
+  const [quizScore, setQuizScore] = useState(0);
+  const [isQuizComplete, setIsQuizComplete] = useState(false);
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState("");
   const [editItemForm, setEditItemForm] = useState({ term: "", meaning: "", note: "", example: "" });
@@ -191,6 +193,8 @@ export default function MyVocabulary() {
     setQuizIndex(0);
     setQuizSelectedAnswer("");
     setQuizFeedback(null);
+    setQuizScore(0);
+    setIsQuizComplete(false);
     const firstQuizItem = items[newQuizOrder[0]];
     setQuizOptions(buildQuizOptions(firstQuizItem, items));
   }, [items]);
@@ -424,6 +428,8 @@ export default function MyVocabulary() {
     setQuizIndex(0);
     setQuizSelectedAnswer("");
     setQuizFeedback(null);
+    setQuizScore(0);
+    setIsQuizComplete(false);
     const firstQuizItem = items[order[0]];
     setQuizOptions(buildQuizOptions(firstQuizItem, items));
   };
@@ -436,6 +442,7 @@ export default function MyVocabulary() {
     setQuizSelectedAnswer(answer);
 
     if (answer === currentQuizItem.meaning) {
+      setQuizScore((prev) => prev + 1);
       setQuizFeedback({
         type: "success",
         message: "Đáp án chính xác",
@@ -454,7 +461,13 @@ export default function MyVocabulary() {
       return;
     }
 
-    const nextIndex = (quizIndex + 1) % quizOrder.length;
+    // Check if this is the last question
+    if (quizIndex === quizOrder.length - 1) {
+      setIsQuizComplete(true);
+      return;
+    }
+
+    const nextIndex = quizIndex + 1;
     const nextQuizItem = items[quizOrder[nextIndex]];
     setQuizIndex(nextIndex);
     setQuizSelectedAnswer("");
@@ -1225,10 +1238,45 @@ export default function MyVocabulary() {
                         <div className="border rounded-3 p-3 bg-white">
                           {!currentQuizItem ? (
                             <p className="text-muted m-0">Khong du du lieu de tao cau hoi.</p>
+                          ) : isQuizComplete ? (
+                            <div className="d-grid gap-3">
+                              <div className="alert alert-info py-3 mb-0">
+                                <h5 className="fw-bold">Hoàn thành bài trắc nghiệm</h5>
+                              </div>
+                              <div className="text-center py-4">
+                                <div className="display-4 fw-bold text-primary mb-2">
+                                  {quizScore}/{quizOrder.length}
+                                </div>
+                                <div className="fs-5 text-muted">
+                                  Bạn trả lời đúng {quizScore} trên {quizOrder.length} câu hỏi
+                                </div>
+                                <div className="text-muted mt-2">
+                                  Tỷ lệ: {Math.round((quizScore / quizOrder.length) * 100)}%
+                                </div>
+                              </div>
+                              <div className="d-flex gap-2 justify-content-center">
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  onClick={resetQuizGame}
+                                >
+                                  Làm lại
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary"
+                                  onClick={() => setLearningMode("list")}
+                                >
+                                  Quay lại danh sách
+                                </button>
+                              </div>
+                            </div>
                           ) : (
                             <div className="d-grid gap-3">
                               <div className="d-flex justify-content-between align-items-center">
-                                <h6 className="fw-bold m-0">Cau hoi {quizIndex + 1}/{quizOrder.length}</h6>
+                                <h6 className="fw-bold m-0">
+                                  Câu hỏi {quizIndex + 1}/{quizOrder.length} - Điểm: {quizScore}
+                                </h6>
                                 <button
                                   type="button"
                                   className="btn btn-sm btn-outline-secondary"
@@ -1239,7 +1287,7 @@ export default function MyVocabulary() {
                               </div>
 
                               <div className="quiz-question-box">
-                                <div className="text-muted small">Tu tieng Anh</div>
+                                <div className="text-muted small">Từ tiếng Anh</div>
                                 <div className="fs-5 fw-semibold">{currentQuizItem.term}</div>
                               </div>
 
@@ -1286,7 +1334,7 @@ export default function MyVocabulary() {
                                   onClick={nextQuizQuestion}
                                   disabled={!quizSelectedAnswer}
                                 >
-                                  Cau tiep theo
+                                  Câu tiếp theo
                                 </button>
                               </div>
                             </div>

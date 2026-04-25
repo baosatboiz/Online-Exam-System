@@ -25,3 +25,11 @@ background: linear-gradient(180deg, #f5de35, #d65309);
     0% { left: -10%; }
     100% { left: 110%; }
 }
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+}
+
+.border-gold {
+    border: 2px solid #ffca2c !important;
+}

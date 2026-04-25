@@ -25,7 +25,12 @@ export default function Home(){
       const fetchSchedulesByMode = async () => {
         try {
           const modeResponses = await Promise.all(
-            modeOptions.map((mode) => fetchData(`/api/exam-schedule?mode=${mode}`))
+            modeOptions.map((mode) => 
+              fetchData(`/api/exam-schedule?mode=${mode}`).catch(err => {
+                console.error(`Lỗi khi tải lịch thi mode ${mode}:`, err);
+                return []; // Nếu 1 API lỗi, giả sử data rỗng để không bị chết các API khác
+              })
+            )
           );
 
           const mergedSchedule = modeResponses.flatMap((res, index) =>

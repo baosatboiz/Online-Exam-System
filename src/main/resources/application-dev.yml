@@ -34,3 +34,11 @@ logging:
     org.springframework.security: debug
 supabase:
   url: "https://esivkcijzzeosdmgjdon.supabase.co/storage/v1/object/public/toeic-assets"
+
+payment:
+  sepay:
+        webhook-token: "BaoTran_PTIT_2026_Secured"
+        bank-bin: "970422"
+        account-number: "0325703673"
+        account-name: "TRAN DAO GIA BAO"
+

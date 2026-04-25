@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,7 +48,14 @@ public class StartExamAttemptImpl implements StartExamAttempt {
 //                .orElseThrow(() -> new DomainException("Exam not found"));
         Integer duration = examRepository.findDurationByBusinessId(examBusinessId);
 
-        ExamAttempt examAttempt = new ExamAttempt(ExamAttemptId.newId(), examSchedule, user, duration, currentTime);
+        ExamAttempt examAttempt = new ExamAttempt(
+                ExamAttemptId.newId(),
+                examSchedule,
+                user,
+                duration,
+                currentTime,
+                Optional.empty()
+        );
         ExamAttempt saved = examAttemptRepository.save(examAttempt, command.userId().value());
         return startExamAttemptResultMapper.from(saved);
     }

@@ -2,8 +2,8 @@
 //     const user = JSON.parse(localStorage.getItem('user'));
 //     return user?.authToken;
 // }
-// const API_ENDPOINT = "/api"
-const API_ENDPOINT = "http://localhost:8080" //dev endpoint
+const API_ENDPOINT = "/api"
+// const API_ENDPOINT = "http://localhost:8080" //dev endpoint
 export default async function fetchData(endpoint,option={}){
     try{
         console.log(`${API_ENDPOINT}${endpoint}`);
@@ -20,7 +20,7 @@ export default async function fetchData(endpoint,option={}){
             throw new Error(error.message || `Lỗi ${res.status}`);
         }
         if(res.status===204) return {};
-        return await res.json();
+        return await res.json().catch(()=>{});
 
     }
     catch(e){

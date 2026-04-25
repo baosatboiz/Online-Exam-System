@@ -72,7 +72,7 @@ export default function LoginForm({setIsLogin}) {
       </form>
       <div className="d-flex justify-content-center mt-3">
         <button className="btn btn-success" 
-        onClick={()=>{window.location.href = "http://localhost:8080/oauth2/authorization/google";}}><i className="bi bi-google"></i> Log in with Google
+        onClick={()=>{window.location.href = "https://api.oes-free.me/oauth2/authorization/google";}}><i className="bi bi-google"></i> Log in with Google
         </button>
         </div>
       </div>

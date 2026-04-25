@@ -28,6 +28,12 @@ public interface ExamMapper {
     @Mapping(target = "questionCache", ignore = true)
     Exam toDomain(ExamEntity entity);
 
+    @Mapping(target = "examId", source = "businessId")
+    @Mapping(target = "part", source = "questionGroups",ignore = true)
+    @Mapping(target = "duration", source = "durationMinutes")
+    @Mapping(target = "questionCache", ignore = true)
+    Exam toCompactDomain(ExamEntity entity);
+
     ExamHeader toHeader(ExamEntity entity);
 
     @Mapping(source = "examId",target = "businessId")

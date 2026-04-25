@@ -28,6 +28,7 @@ public class Exam {
         return new Exam(ExamId.newId(),part,title,duration);
     }
     void initializeQuestionCache(){
+        if(part == null) return;
         int count = 1;
         for(Part p : part) for(QuestionGroup q : p.getQuestionGroups())
             for(Question question : q.getQuestions()){

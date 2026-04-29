@@ -8,6 +8,8 @@ import com.example.toeicwebsite.domain.vocabulary.model.VocabularyItem;
 import com.example.toeicwebsite.domain.vocabulary.model.VocabularySet;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularyItemRepository;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetRepository;
+import com.example.toeicwebsite.infrastucture.external.dictionary.DictionaryApiClient;
+import com.example.toeicwebsite.infrastucture.external.dictionary.dto.PronunciationData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.util.Set;
 public class CreateVocabularySetWithItemsImpl implements CreateVocabularySetWithItems {
     private final VocabularySetRepository vocabularySetRepository;
     private final VocabularyItemRepository vocabularyItemRepository;
+    private final DictionaryApiClient dictionaryApiClient;
 
     @Override
     @Transactional
@@ -48,13 +51,19 @@ public class CreateVocabularySetWithItemsImpl implements CreateVocabularySetWith
                 }
 
                 seenNormalized.add(normalized);
-                validItems.add(VocabularyItem.create(
+
+                PronunciationData pronunciationData = dictionaryApiClient.fetchPronunciation(input.term())
+                        .orElse(null);
+
+                validItems.add(VocabularyItem.createWithPronunciation(
                         set.getVocabularySetId(),
                         command.userId(),
                         input.term(),
                         input.meaning(),
                         input.note(),
-                        input.example()
+                        input.example(),
+                        pronunciationData != null ? pronunciationData.pronunciation() : null,
+                        pronunciationData != null ? pronunciationData.audioUrl() : null
                 ));
             }
         }

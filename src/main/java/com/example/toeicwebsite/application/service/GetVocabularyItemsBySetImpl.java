@@ -30,6 +30,8 @@ public class GetVocabularyItemsBySetImpl implements GetVocabularyItemsBySet {
                 item.getMeaning(),
                 item.getNote(),
                 item.getExample(),
+                item.getPronunciation(),
+                item.getAudioUrl(),
                 item.getCreatedAt(),
                 item.getUpdatedAt()
         )).toList();

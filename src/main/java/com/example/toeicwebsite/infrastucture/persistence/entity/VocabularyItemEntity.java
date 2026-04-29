@@ -41,6 +41,12 @@ public class VocabularyItemEntity {
     @Column(columnDefinition = "TEXT")
     private String example;
 
+    @Column(columnDefinition = "TEXT")
+    private String pronunciation;
+
+    @Column(name = "audio_url", columnDefinition = "TEXT")
+    private String audioUrl;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

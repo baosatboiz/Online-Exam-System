@@ -518,6 +518,16 @@ export default function MyVocabulary() {
     }
   };
 
+  const playAudio = (audioUrl) => {
+    if (!audioUrl) {
+      return;
+    }
+    const audio = new Audio(audioUrl);
+    audio.play().catch((err) => {
+      console.error("Error playing audio:", err);
+    });
+  };
+
   const handleMatchingCardClick = (cardId) => {
     if (matchingBusy || matchedMatchingCards.includes(cardId) || selectedMatchingCards.includes(cardId)) {
       return;
@@ -940,7 +950,7 @@ export default function MyVocabulary() {
         )}
 
         <div className="row g-3">
-          <div className={selectedSetId ? "col-lg-4" : "col-12"}>
+          <div className={selectedSetId ? "col-lg-3" : "col-12"}>
             <div className="card shadow-sm border-0 h-100">
               <div className="card-body">
                 <h5 className="fw-bold">Bộ từ của bạn</h5>
@@ -1005,7 +1015,7 @@ export default function MyVocabulary() {
           </div>
 
           {selectedSetId && (
-            <div className="col-lg-8">
+            <div className="col-lg-9">
               <div className="card shadow-sm border-0 h-100">
                 <div className="card-body">
                   <div className="d-flex justify-content-between align-items-center mb-3">
@@ -1067,14 +1077,16 @@ export default function MyVocabulary() {
 
                       {learningMode === "list" && (
                         <div className="table-responsive">
-                          <table className="table table-striped">
+                          <table className="table table-striped table-sm">
                             <thead>
                               <tr>
-                                <th>Term</th>
-                                <th>Meaning</th>
-                                <th>Note</th>
-                                <th>Example</th>
-                                <th>Action</th>
+                                <th style={{ minWidth: "120px" }}>Term</th>
+                                <th style={{ minWidth: "120px" }}>Meaning</th>
+                                <th style={{ minWidth: "100px" }}>Pronunciation</th>
+                                <th style={{ minWidth: "80px" }}>Audio</th>
+                                <th style={{ minWidth: "80px" }}>Note</th>
+                                <th style={{ minWidth: "100px" }}>Example</th>
+                                <th style={{ minWidth: "80px" }}>Action</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1082,8 +1094,23 @@ export default function MyVocabulary() {
                                 <tr key={item.itemId}>
                                   <td className="fw-semibold">{item.term}</td>
                                   <td>{item.meaning}</td>
-                                  <td>{item.note || "-"}</td>
-                                  <td>{item.example || "-"}</td>
+                                  <td className="small text-muted">{item.pronunciation || "-"}</td>
+                                  <td>
+                                    {item.audioUrl ? (
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-info p-1"
+                                        onClick={() => playAudio(item.audioUrl)}
+                                        title="Play pronunciation"
+                                      >
+                                        🔊
+                                      </button>
+                                    ) : (
+                                      <span className="text-muted small">-</span>
+                                    )}
+                                  </td>
+                                  <td className="small">{item.note || "-"}</td>
+                                  <td className="small">{item.example || "-"}</td>
                                   <td>
                                     <button
                                       type="button"

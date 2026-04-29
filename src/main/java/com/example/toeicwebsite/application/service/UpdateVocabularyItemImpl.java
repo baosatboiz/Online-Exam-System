@@ -8,6 +8,8 @@ import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import com.example.toeicwebsite.domain.vocabulary.model.VocabularyItem;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularyItemRepository;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetRepository;
+import com.example.toeicwebsite.infrastucture.external.dictionary.DictionaryApiClient;
+import com.example.toeicwebsite.infrastucture.external.dictionary.dto.PronunciationData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateVocabularyItemImpl implements UpdateVocabularyItem {
     private final VocabularySetRepository vocabularySetRepository;
     private final VocabularyItemRepository vocabularyItemRepository;
+    private final DictionaryApiClient dictionaryApiClient;
 
     @Override
     @Transactional
@@ -38,11 +41,16 @@ public class UpdateVocabularyItemImpl implements UpdateVocabularyItem {
             throw new DomainNotFoundException("Vocabulary item not found in this set");
         }
 
-        VocabularyItem updatedItem = currentItem.update(
+        PronunciationData pronunciationData = dictionaryApiClient.fetchPronunciation(command.term())
+                .orElse(null);
+
+        VocabularyItem updatedItem = currentItem.updateWithPronunciation(
                 command.term(),
                 command.meaning(),
                 command.note(),
-                command.example()
+                command.example(),
+                pronunciationData != null ? pronunciationData.pronunciation() : null,
+                pronunciationData != null ? pronunciationData.audioUrl() : null
         );
 
         VocabularyItem saved = vocabularyItemRepository.save(updatedItem);
@@ -53,6 +61,8 @@ public class UpdateVocabularyItemImpl implements UpdateVocabularyItem {
                 saved.getMeaning(),
                 saved.getNote(),
                 saved.getExample(),
+                saved.getPronunciation(),
+                saved.getAudioUrl(),
                 saved.getCreatedAt(),
                 saved.getUpdatedAt()
         );

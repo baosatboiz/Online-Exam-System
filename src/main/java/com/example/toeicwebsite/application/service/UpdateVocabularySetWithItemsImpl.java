@@ -9,6 +9,9 @@ import com.example.toeicwebsite.domain.vocabulary.model.VocabularyItemId;
 import com.example.toeicwebsite.domain.vocabulary.model.VocabularySet;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularyItemRepository;
 import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetRepository;
+import com.example.toeicwebsite.infrastucture.external.dictionary.DictionaryApiClient;
+import com.example.toeicwebsite.infrastucture.external.dictionary.dto.PronunciationData;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class UpdateVocabularySetWithItemsImpl implements UpdateVocabularySetWithItems {
     private final VocabularySetRepository vocabularySetRepository;
     private final VocabularyItemRepository vocabularyItemRepository;
+    private final DictionaryApiClient dictionaryApiClient;
 
     @Override
     @Transactional
@@ -50,14 +54,19 @@ public class UpdateVocabularySetWithItemsImpl implements UpdateVocabularySetWith
                     continue;
                 }
 
+                PronunciationData pronunciationData = dictionaryApiClient.fetchPronunciation(itemUpdate.term())
+                    .orElse(null);
+
                 if (itemUpdate.isNew()) {
-                    VocabularyItem newItem = VocabularyItem.create(
+                    VocabularyItem newItem = VocabularyItem.createWithPronunciation(
                             command.setId(),
                             command.userId(),
                             itemUpdate.term(),
                             itemUpdate.meaning(),
                             itemUpdate.note(),
-                            itemUpdate.example()
+                            itemUpdate.example(),
+                            pronunciationData != null ? pronunciationData.pronunciation() : null,
+                            pronunciationData != null ? pronunciationData.audioUrl() : null
                     );
                     items.add(newItem);
                     incomingItemIds.add(newItem.getVocabularyItemId().value().toString());
@@ -67,11 +76,13 @@ public class UpdateVocabularySetWithItemsImpl implements UpdateVocabularySetWith
                         throw new BusinessRuleException("Item not found");
                     }
                     
-                    VocabularyItem updatedItem = existingItem.update(
+                    VocabularyItem updatedItem = existingItem.updateWithPronunciation(
                             itemUpdate.term(),
                             itemUpdate.meaning(),
                             itemUpdate.note(),
-                            itemUpdate.example()
+                            itemUpdate.example(),
+                            pronunciationData != null ? pronunciationData.pronunciation() : null,
+                            pronunciationData != null ? pronunciationData.audioUrl() : null
                     );
                     items.add(updatedItem);
                     incomingItemIds.add(itemUpdate.itemId());

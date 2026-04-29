@@ -10,6 +10,8 @@ public record VocabularyItemResult(
         String meaning,
         String note,
         String example,
+        String pronunciation,
+        String audioUrl,
         Instant createdAt,
         Instant updatedAt
 ) {

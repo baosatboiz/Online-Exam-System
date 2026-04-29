@@ -137,6 +137,8 @@ public class VocabularyController {
                 item.meaning(),
                 item.note(),
                 item.example(),
+                item.pronunciation(),
+                item.audioUrl(),
                 item.createdAt(),
                 item.updatedAt()
         )).toList();
@@ -162,6 +164,8 @@ public class VocabularyController {
                 item.meaning(),
                 item.note(),
                 item.example(),
+                item.pronunciation(),
+                item.audioUrl(),
                 item.createdAt(),
                 item.updatedAt()
         ));
@@ -188,6 +192,8 @@ public class VocabularyController {
                 item.meaning(),
                 item.note(),
                 item.example(),
+                item.pronunciation(),
+                item.audioUrl(),
                 item.createdAt(),
                 item.updatedAt()
         ));

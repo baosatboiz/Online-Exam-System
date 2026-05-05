@@ -2,8 +2,8 @@
 //     const user = JSON.parse(localStorage.getItem('user'));
 //     return user?.authToken;
 // }
-const API_ENDPOINT = "/api"
-// const API_ENDPOINT = "http://localhost:8080" //dev endpoint
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT ?? "/api"
+
 export default async function fetchData(endpoint,option={}){
     try{
         console.log(`${API_ENDPOINT}${endpoint}`);

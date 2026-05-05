@@ -32,3 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/application-bao.yml
+
+### Environment variables (never commit real secrets!) ###
+.env

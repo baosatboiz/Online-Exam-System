@@ -95,4 +95,12 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
                                 ExamAttemptEntity::getStatus,
                         (existing,replacement)->replacement));
     }
+
+    @Override
+    public List<ExamAttempt> findInProgressAttempts() {
+        return jpaExamAttemptRepository.findAllInProgress()
+                .stream()
+                .map(examAttemptMinimalMapper::toDomainMinimal)
+                .collect(Collectors.toList());
+    }
 }

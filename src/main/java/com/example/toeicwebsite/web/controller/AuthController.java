@@ -34,10 +34,10 @@ public class AuthController {
         LoginResult result = login.execute(mapper.toCommand(request));
         ResponseCookie cookie = ResponseCookie.from("access_token",result.authToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(3600)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         return ResponseEntity.ok().header("Set-Cookie",cookie.toString()).body(Collections.emptyMap());
 

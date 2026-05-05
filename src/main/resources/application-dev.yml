@@ -1,8 +1,10 @@
+server:
+  forward-headers-strategy: framework
 spring:
   datasource:
-    url: jdbc:postgresql://toeic-baotran24092004-0bec.h.aivencloud.com:17496/toeic?sslmode=require
-    username: avnadmin
-    password: AVNS_6dpk6bbQdxxJVLlR717
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 5
       minimum-idle: 1
@@ -15,30 +17,53 @@ spring:
   flyway:
     enabled: true
 
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: 261892871681-pf7dj933v8jjat676lp8snl0ahgfjfmg.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
 
+  task:
+    scheduling:
+      enabled: true
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.springframework.security: debug
 supabase:
-  url: "https://esivkcijzzeosdmgjdon.supabase.co/storage/v1/object/public/toeic-assets"
+  url: ${SUPABASE_URL}
 
 payment:
   sepay:
-        webhook-token: "BaoTran_PTIT_2026_Secured"
-        bank-bin: "970422"
-        account-number: "0325703673"
-        account-name: "TRAN DAO GIA BAO"
+        webhook-token: ${SEPAY_WEBHOOK_TOKEN}
+        bank-bin: ${SEPAY_BANK_BIN}
+        account-number: ${SEPAY_ACCOUNT_NUMBER}
+        account-name: ${SEPAY_ACCOUNT_NAME}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+  frontend-url: ${FRONTEND_URL}
+  api-url: ${API_URL}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
 

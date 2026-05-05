@@ -43,4 +43,10 @@ public interface JpaExamAttemptRepository extends JpaRepository<ExamAttemptEntit
     and ea.examSchedule.businessId in :ids
 """)
     List<ExamAttemptEntity> findByUserIdAndExamScheduleIdsIn(UUID userId, List<UUID> ids);
+
+    @Query("""
+        SELECT ea FROM ExamAttemptEntity ea
+        WHERE ea.status = com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus.IN_PROGRESS
+    """)
+    List<ExamAttemptEntity> findAllInProgress();
 }

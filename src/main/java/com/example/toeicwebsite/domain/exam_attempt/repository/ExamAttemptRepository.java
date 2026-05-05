@@ -20,4 +20,5 @@ public interface ExamAttemptRepository {
     void saveAnsweredQuestion(ExamAttemptId attemptId, Long questionId, ChoiceKey choiceKey);
     Map<ExamScheduleId,Long> countTotalAttemptsIn(List<ExamScheduleId> ids);
     Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(UUID userId, List<ExamScheduleId> ids);
+    List<ExamAttempt> findInProgressAttempts();
 }

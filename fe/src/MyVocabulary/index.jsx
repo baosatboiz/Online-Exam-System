@@ -1,73 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import NavBar from "../NavBar";
 import fetchData from "../fetch/fetchData";
+import AiConfigModal from "./AiConfigModal";
+import AiGeneratorModal from "./AiGeneratorModal";
+import FlashcardMode from "./components/FlashcardMode";
+import MatchingMode from "./components/MatchingMode";
+import QuizMode from "./components/QuizMode";
 import "./index.css";
 
 const emptyItem = () => ({ term: "", meaning: "", note: "", example: "" });
-const MAX_MATCH_ITEMS = 6;
-const MAX_QUIZ_OPTIONS = 4;
-
-const shuffleArray = (arr) => {
-  const copy = [...arr];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-};
-
-const isSameOrder = (a, b) => {
-  if (a.length !== b.length) {
-    return false;
-  }
-  return a.every((value, index) => value === b[index]);
-};
-
-const buildMatchingCards = (sourceItems) => {
-  const chosenItems = shuffleArray(sourceItems).slice(0, MAX_MATCH_ITEMS);
-  const cards = chosenItems.flatMap((item) => [
-    {
-      id: `${item.itemId}-term`,
-      pairId: item.itemId,
-      type: "term",
-      text: item.term,
-    },
-    {
-      id: `${item.itemId}-meaning`,
-      pairId: item.itemId,
-      type: "meaning",
-      text: item.meaning,
-    },
-  ]);
-  return shuffleArray(cards);
-};
-
-const normalizeMeaning = (meaning) => (meaning || "").trim().toLowerCase();
-
-const buildQuizOptions = (currentItem, sourceItems) => {
-  if (!currentItem) {
-    return [];
-  }
-
-  const correctMeaning = currentItem.meaning;
-  const seen = new Set([normalizeMeaning(correctMeaning)]);
-  const wrongMeanings = shuffleArray(
-    sourceItems
-      .filter((item) => item.itemId !== currentItem.itemId)
-      .map((item) => item.meaning)
-      .filter((meaning) => {
-        const normalized = normalizeMeaning(meaning);
-        if (!normalized || seen.has(normalized)) {
-          return false;
-        }
-        seen.add(normalized);
-        return true;
-      })
-  );
-
-  const options = [correctMeaning, ...wrongMeanings].slice(0, MAX_QUIZ_OPTIONS);
-  return shuffleArray(options);
-};
 
 export default function MyVocabulary() {
   const [sets, setSets] = useState([]);
@@ -91,26 +32,17 @@ export default function MyVocabulary() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [setSearchKeyword, setSetSearchKeyword] = useState("");
   const [learningMode, setLearningMode] = useState("list");
-  const [flashMode, setFlashMode] = useState("en");
-  const [flashOrder, setFlashOrder] = useState([]);
-  const [flashIndex, setFlashIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [matchingCards, setMatchingCards] = useState([]);
-  const [selectedMatchingCards, setSelectedMatchingCards] = useState([]);
-  const [matchedMatchingCards, setMatchedMatchingCards] = useState([]);
-  const [matchingBusy, setMatchingBusy] = useState(false);
-  const [quizOrder, setQuizOrder] = useState([]);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [quizOptions, setQuizOptions] = useState([]);
-  const [quizSelectedAnswer, setQuizSelectedAnswer] = useState("");
-  const [quizFeedback, setQuizFeedback] = useState(null);
-  const [quizScore, setQuizScore] = useState(0);
-  const [isQuizComplete, setIsQuizComplete] = useState(false);
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState("");
   const [editItemForm, setEditItemForm] = useState({ term: "", meaning: "", note: "", example: "" });
   const [editItemLoading, setEditItemLoading] = useState(false);
-  const matchingTimerRef = useRef(null);
+  const [showAiConfigModal, setShowAiConfigModal] = useState(false);
+  const [showAiGeneratorModal, setShowAiGeneratorModal] = useState(false);
+  const [aiProviders, setAiProviders] = useState([]);
+  const [createFormAiItemIndex, setCreateFormAiItemIndex] = useState(-1);
+  const [aiConfigDetails, setAiConfigDetails] = useState({});
+  const [createFormSubmitting, setCreateFormSubmitting] = useState(false);
+  const [editFormAiItemIndex, setEditFormAiItemIndex] = useState(-1);
 
   const selectedSet = useMemo(
     () => sets.find((set) => set.setId === selectedSetId),
@@ -124,22 +56,6 @@ export default function MyVocabulary() {
     }
     return sets.filter((set) => (set.name || "").toLowerCase().includes(keyword));
   }, [sets, setSearchKeyword]);
-
-  const currentFlashItem = useMemo(() => {
-    if (!items.length || !flashOrder.length) {
-      return null;
-    }
-    const itemIndex = flashOrder[flashIndex] ?? flashOrder[0];
-    return items[itemIndex] || null;
-  }, [items, flashOrder, flashIndex]);
-
-  const currentQuizItem = useMemo(() => {
-    if (!items.length || !quizOrder.length) {
-      return null;
-    }
-    const itemIndex = quizOrder[quizIndex] ?? quizOrder[0];
-    return items[itemIndex] || null;
-  }, [items, quizOrder, quizIndex]);
 
   const loadSets = async () => {
     setLoadingSets(true);
@@ -173,39 +89,45 @@ export default function MyVocabulary() {
 
   useEffect(() => {
     loadSets();
+    loadAiProviders();
   }, []);
+
+  const loadAiProviders = async () => {
+    const providers = [];
+    const details = {};
+    try {
+      const groqConfig = await fetchData("/api/ai-config/groq").catch((err) => {
+        if (err?.message?.includes("404") || err?.message?.includes("Lỗi 404")) return null;
+        throw err;
+      });
+      if (groqConfig) {
+        providers.push("groq");
+        details.groq = groqConfig;
+      }
+    } catch (err) {
+      console.log("Error checking Groq config:", err);
+    }
+
+    try {
+      const openrouterConfig = await fetchData("/api/ai-config/openrouter").catch((err) => {
+        if (err?.message?.includes("404") || err?.message?.includes("Lỗi 404")) return null;
+        throw err;
+      });
+      if (openrouterConfig) {
+        providers.push("openrouter");
+        details.openrouter = openrouterConfig;
+      }
+    } catch (err) {
+      console.log("Error checking OpenRouter config:", err);
+    }
+
+    setAiProviders(providers);
+    setAiConfigDetails(details);
+  };
 
   useEffect(() => {
     loadItems(selectedSetId);
   }, [selectedSetId]);
-
-  useEffect(() => {
-    const defaultOrder = items.map((_, index) => index);
-    setFlashOrder(defaultOrder);
-    setFlashIndex(0);
-    setIsFlipped(false);
-    setMatchingCards(buildMatchingCards(items));
-    setSelectedMatchingCards([]);
-    setMatchedMatchingCards([]);
-    setMatchingBusy(false);
-    const newQuizOrder = shuffleArray(defaultOrder);
-    setQuizOrder(newQuizOrder);
-    setQuizIndex(0);
-    setQuizSelectedAnswer("");
-    setQuizFeedback(null);
-    setQuizScore(0);
-    setIsQuizComplete(false);
-    const firstQuizItem = items[newQuizOrder[0]];
-    setQuizOptions(buildQuizOptions(firstQuizItem, items));
-  }, [items]);
-
-  useEffect(() => {
-    return () => {
-      if (matchingTimerRef.current) {
-        clearTimeout(matchingTimerRef.current);
-      }
-    };
-  }, []);
 
   const updateItemField = (index, field, value) => {
     setForm((prev) => ({
@@ -241,6 +163,7 @@ export default function MyVocabulary() {
     event.preventDefault();
     setSubmitMessage("");
     setSubmitError("");
+    setCreateFormSubmitting(true);
     try {
       const payload = {
         name: form.name,
@@ -262,6 +185,8 @@ export default function MyVocabulary() {
       setShowCreateForm(false);
     } catch (error) {
       setSubmitError(error.message || "Tạo bộ từ thất bại");
+    } finally {
+      setCreateFormSubmitting(false);
     }
   };
 
@@ -351,6 +276,59 @@ export default function MyVocabulary() {
     }
   };
 
+  const handleAiConfigSaved = () => {
+    loadAiProviders();
+  };
+
+  const handleAiGenerated = (generatedData) => {
+    if (generatedData) {
+      setEditItemForm((prev) => ({
+        ...prev,
+        meaning: generatedData.meaning || prev.meaning,
+        note: generatedData.note || prev.note,
+        example: generatedData.example || prev.example,
+      }));
+    }
+  };
+
+  const handleCreateFormAiGenerated = (generatedData) => {
+    if (generatedData && createFormAiItemIndex >= 0) {
+      setForm((prev) => ({
+        ...prev,
+        items: prev.items.map((item, index) =>
+          index === createFormAiItemIndex
+            ? {
+                ...item,
+                meaning: generatedData.meaning || item.meaning,
+                note: generatedData.note || item.note,
+                example: generatedData.example || item.example,
+              }
+            : item
+        ),
+      }));
+      setCreateFormAiItemIndex(-1);
+    }
+  };
+
+  const handleEditFormAiGenerated = (generatedData) => {
+    if (generatedData && editFormAiItemIndex >= 0) {
+      setEditForm((prev) => ({
+        ...prev,
+        items: prev.items.map((item, index) =>
+          index === editFormAiItemIndex
+            ? {
+                ...item,
+                meaning: generatedData.meaning || item.meaning,
+                note: generatedData.note || item.note,
+                example: generatedData.example || item.example,
+              }
+            : item
+        ),
+      }));
+      setEditFormAiItemIndex(-1);
+    }
+  };
+
   const handleDeleteSet = async (setId) => {
     setDeleteLoading(true);
     try {
@@ -369,110 +347,6 @@ export default function MyVocabulary() {
     } finally {
       setDeleteLoading(false);
     }
-  };
-
-  const moveToNextFlashcard = () => {
-    if (!flashOrder.length) {
-      return;
-    }
-    setFlashIndex((prev) => (prev + 1) % flashOrder.length);
-    setIsFlipped(false);
-  };
-
-  const moveToPrevFlashcard = () => {
-    if (!flashOrder.length) {
-      return;
-    }
-    setFlashIndex((prev) => (prev - 1 + flashOrder.length) % flashOrder.length);
-    setIsFlipped(false);
-  };
-
-  const shuffleFlashcards = () => {
-    if (items.length <= 1) {
-      return;
-    }
-
-    const original = items.map((_, index) => index);
-    let shuffled = shuffleArray(original);
-    let retries = 0;
-
-    while (isSameOrder(original, shuffled) && retries < 5) {
-      shuffled = shuffleArray(original);
-      retries += 1;
-    }
-
-    setFlashOrder(shuffled);
-    setFlashIndex(0);
-    setIsFlipped(false);
-  };
-
-  const resetFlashOrder = () => {
-    setFlashOrder(items.map((_, index) => index));
-    setFlashIndex(0);
-    setIsFlipped(false);
-  };
-
-  const resetMatchingGame = () => {
-    if (matchingTimerRef.current) {
-      clearTimeout(matchingTimerRef.current);
-    }
-    setMatchingCards(buildMatchingCards(items));
-    setSelectedMatchingCards([]);
-    setMatchedMatchingCards([]);
-    setMatchingBusy(false);
-  };
-
-  const resetQuizGame = () => {
-    const order = shuffleArray(items.map((_, index) => index));
-    setQuizOrder(order);
-    setQuizIndex(0);
-    setQuizSelectedAnswer("");
-    setQuizFeedback(null);
-    setQuizScore(0);
-    setIsQuizComplete(false);
-    const firstQuizItem = items[order[0]];
-    setQuizOptions(buildQuizOptions(firstQuizItem, items));
-  };
-
-  const answerQuizQuestion = (answer) => {
-    if (!currentQuizItem || quizSelectedAnswer) {
-      return;
-    }
-
-    setQuizSelectedAnswer(answer);
-
-    if (answer === currentQuizItem.meaning) {
-      setQuizScore((prev) => prev + 1);
-      setQuizFeedback({
-        type: "success",
-        message: "Đáp án chính xác",
-      });
-      return;
-    }
-
-    setQuizFeedback({
-      type: "danger",
-      message: `Trả lời sai. Đáp án đúng: ${currentQuizItem.meaning}`,
-    });
-  };
-
-  const nextQuizQuestion = () => {
-    if (!quizOrder.length) {
-      return;
-    }
-
-    // Check if this is the last question
-    if (quizIndex === quizOrder.length - 1) {
-      setIsQuizComplete(true);
-      return;
-    }
-
-    const nextIndex = quizIndex + 1;
-    const nextQuizItem = items[quizOrder[nextIndex]];
-    setQuizIndex(nextIndex);
-    setQuizSelectedAnswer("");
-    setQuizFeedback(null);
-    setQuizOptions(buildQuizOptions(nextQuizItem, items));
   };
 
   const openEditItemModal = (item) => {
@@ -528,76 +402,72 @@ export default function MyVocabulary() {
     });
   };
 
-  const handleMatchingCardClick = (cardId) => {
-    if (matchingBusy || matchedMatchingCards.includes(cardId) || selectedMatchingCards.includes(cardId)) {
-      return;
-    }
-
-    if (selectedMatchingCards.length === 0) {
-      setSelectedMatchingCards([cardId]);
-      return;
-    }
-
-    const firstCardId = selectedMatchingCards[0];
-    const secondCardId = cardId;
-    const firstCard = matchingCards.find((card) => card.id === firstCardId);
-    const secondCard = matchingCards.find((card) => card.id === secondCardId);
-
-    if (!firstCard || !secondCard) {
-      setSelectedMatchingCards([]);
-      return;
-    }
-
-    const isMatched =
-      firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type;
-
-    setSelectedMatchingCards([firstCardId, secondCardId]);
-    setMatchingBusy(true);
-
-    if (matchingTimerRef.current) {
-      clearTimeout(matchingTimerRef.current);
-    }
-
-    matchingTimerRef.current = setTimeout(() => {
-      if (isMatched) {
-        setMatchedMatchingCards((prev) => [...prev, firstCardId, secondCardId]);
-      }
-      setSelectedMatchingCards([]);
-      setMatchingBusy(false);
-    }, isMatched ? 260 : 700);
-  };
-
-  const matchingCompleted =
-    matchingCards.length > 0 && matchedMatchingCards.length === matchingCards.length;
-
-  const frontText =
-    flashMode === "en" ? currentFlashItem?.term || "" : currentFlashItem?.meaning || "";
-  const backText =
-    flashMode === "en" ? currentFlashItem?.meaning || "" : currentFlashItem?.term || "";
-
   return (
     <div className="min-vh-100 bg-light">
       <NavBar />
       <div className="container py-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="fw-bold m-0">My Vocabulary</h2>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setShowCreateForm((prev) => !prev);
-              setSubmitError("");
-              setSubmitMessage("");
-            }}
-          >
-            {showCreateForm ? "Đóng" : "Tạo bộ từ mới"}
-          </button>
+          <div className="d-flex gap-2">
+            <button
+              className="btn btn-outline-secondary btn-sm"
+              onClick={() => setShowAiConfigModal(true)}
+              title="Cấu hình AI Models"
+            >
+              ⚙️ AI Config
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                setShowCreateForm((prev) => !prev);
+                setSubmitError("");
+                setSubmitMessage("");
+              }}
+            >
+              {showCreateForm ? "Đóng" : "Tạo bộ từ mới"}
+            </button>
+          </div>
         </div>
 
         {submitMessage && <div className="alert alert-success">{submitMessage}</div>}
         {submitError && <div className="alert alert-danger">{submitError}</div>}
 
+        <AiConfigModal
+          show={showAiConfigModal}
+          onClose={() => setShowAiConfigModal(false)}
+          onConfigSaved={handleAiConfigSaved}
+        />
+
+        <AiGeneratorModal
+          show={showAiGeneratorModal}
+          onClose={() => setShowAiGeneratorModal(false)}
+          term={editItemForm.term}
+          onGenerated={handleAiGenerated}
+          availableProviders={aiProviders}
+        />
+
+        {createFormAiItemIndex >= 0 && (
+          <AiGeneratorModal
+            show={true}
+            onClose={() => setCreateFormAiItemIndex(-1)}
+            term={form.items[createFormAiItemIndex]?.term || ""}
+            onGenerated={handleCreateFormAiGenerated}
+            availableProviders={aiProviders}
+          />
+        )}
+
+        {editFormAiItemIndex >= 0 && (
+          <AiGeneratorModal
+            show={true}
+            onClose={() => setEditFormAiItemIndex(-1)}
+            term={editForm.items[editFormAiItemIndex]?.term || ""}
+            onGenerated={handleEditFormAiGenerated}
+            availableProviders={aiProviders}
+          />
+        )}
+
         {showEditModal && (
-          <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+          <div className="modal d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 11000 }}>
             <div className="modal-dialog modal-dialog-centered modal-xl">
               <div className="modal-content">
                 <div className="modal-header">
@@ -632,6 +502,14 @@ export default function MyVocabulary() {
                         rows={2}
                       />
                     </div>
+                    {aiProviders.length > 0 && (
+                      <div className="alert alert-info mb-3 py-2">
+                        <small>
+                          💡 <strong>Mẹo AI:</strong> Khi cập nhật từ, bạn có thể dùng nút "Tạo từ AI" 
+                          để tự động điền Meaning, Note, Example!
+                        </small>
+                      </div>
+                    )}
                     <div className="mb-3">
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <label className="form-label m-0">Từ vựng ({editForm.items?.length || 0})</label>
@@ -704,13 +582,24 @@ export default function MyVocabulary() {
                                   />
                                 </td>
                                 <td>
-                                  <button
-                                    type="button"
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => removeEditItemRow(index)}
-                                  >
-                                    Xóa
-                                  </button>
+                                  <div className="d-flex flex-column gap-1">
+                                    {aiProviders.length > 0 && item.term.trim() && (
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-info"
+                                        onClick={() => setEditFormAiItemIndex(index)}
+                                      >
+                                        🤖 AI
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm btn-danger"
+                                      onClick={() => removeEditItemRow(index)}
+                                    >
+                                      Xóa
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -802,6 +691,18 @@ export default function MyVocabulary() {
                         }
                       />
                     </div>
+                    {aiProviders.length > 0 && editItemForm.term.trim() && (
+                      <div>
+                        <button
+                          type="button"
+                          className="btn btn-outline-info w-100"
+                          onClick={() => setShowAiGeneratorModal(true)}
+                          disabled={editItemLoading}
+                        >
+                          🤖 Tạo từ Meaning, Note, Example bằng AI
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="modal-footer">
                     <button
@@ -868,6 +769,14 @@ export default function MyVocabulary() {
           <div className="card shadow-sm border-0 mb-4">
             <div className="card-body">
               <h5 className="fw-bold mb-3">Tạo bộ từ</h5>
+              {aiProviders.length > 0 && (
+                <div className="alert alert-info mb-3 py-2">
+                  <small>
+                    💡 <strong>Mẹo AI:</strong> Bạn có thể chỉ nhập từ (Term) và để trống Meaning, Note, Example. 
+                    AI ({aiProviders.join("/").toUpperCase()}) sẽ tự động điền các trường này cho bạn!
+                  </small>
+                </div>
+              )}
               <form onSubmit={handleCreateSet} className="d-grid gap-3">
                 <div>
                   <label className="form-label">Tên bộ từ</label>
@@ -923,6 +832,17 @@ export default function MyVocabulary() {
                             onChange={(event) => updateItemField(index, "example", event.target.value)}
                           />
                         </div>
+                        {aiProviders.length > 0 && item.term.trim() && (
+                          <div className="col-12">
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-info w-100"
+                              onClick={() => setCreateFormAiItemIndex(index)}
+                            >
+                              🤖 Tạo Meaning, Note, Example bằng AI
+                            </button>
+                          </div>
+                        )}
                       </div>
                       {form.items.length > 2 && (
                         <button
@@ -940,8 +860,8 @@ export default function MyVocabulary() {
                   <button type="button" className="btn btn-outline-primary" onClick={addInputRow}>
                     + Thêm ô nhập từ
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    Tạo bộ từ
+                  <button type="submit" className="btn btn-primary" disabled={createFormSubmitting}>
+                    {createFormSubmitting ? "Đang tạo..." : "Tạo bộ từ"}
                   </button>
                 </div>
               </form>
@@ -951,6 +871,32 @@ export default function MyVocabulary() {
 
         <div className="row g-3">
           <div className={selectedSetId ? "col-lg-3" : "col-12"}>
+            {/* AI Configs Section */}
+            {aiProviders.length > 0 && (
+              <div className="card shadow-sm border-0 mb-3">
+                <div className="card-body">
+                  <h5 className="fw-bold mb-3">Cấu hình AI đã lưu</h5>
+                  <div className="d-grid gap-2">
+                    {aiProviders.map((provider) => (
+                      <div key={provider} className="alert alert-info py-2 mb-0">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="fw-bold">
+                            {provider === "groq" ? "🚀 Groq" : "🔄 OpenRouter"}
+                          </span>
+                          <span className="badge bg-success">✓ Hoạt động</span>
+                        </div>
+                        {aiConfigDetails[provider]?.createdAt && (
+                          <small className="text-muted">
+                            Lưu: {new Date(aiConfigDetails[provider].createdAt).toLocaleDateString("vi-VN")}
+                          </small>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="card shadow-sm border-0 h-100">
               <div className="card-body">
                 <h5 className="fw-bold">Bộ từ của bạn</h5>
@@ -1127,247 +1073,11 @@ export default function MyVocabulary() {
                         </div>
                       )}
 
-                      {learningMode === "flashcard" && (
-                        <div className="flashcard-shell border rounded-3 p-3">
-                          <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
-                            <div className="btn-group" role="group" aria-label="Chọn mặt trước flashcard">
-                              <button
-                                type="button"
-                                className={`btn btn-sm ${flashMode === "en" ? "btn-primary" : "btn-outline-primary"}`}
-                                onClick={() => {
-                                  setFlashMode("en");
-                                  setIsFlipped(false);
-                                }}
-                              >
-                                Mặt trước English
-                              </button>
-                              <button
-                                type="button"
-                                className={`btn btn-sm ${flashMode === "vi" ? "btn-primary" : "btn-outline-primary"}`}
-                                onClick={() => {
-                                  setFlashMode("vi");
-                                  setIsFlipped(false);
-                                }}
-                              >
-                                Mặt trước Vietnamese
-                              </button>
-                            </div>
-                            <div className="d-flex gap-2">
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-dark"
-                                onClick={shuffleFlashcards}
-                              >
-                                Đảo thứ tự
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={resetFlashOrder}
-                              >
-                                Về thứ tự gốc
-                              </button>
-                            </div>
-                          </div>
+                      {learningMode === "flashcard" && <FlashcardMode items={items} />}
 
-                          <div className="flashcard-meta text-muted small mb-2">
-                            <span>
-                              Thẻ {flashOrder.length ? flashIndex + 1 : 0}/{flashOrder.length}
-                            </span>
-                          </div>
+                      {learningMode === "matching" && <MatchingMode items={items} />}
 
-                          <button
-                            type="button"
-                            className={`flashcard-card ${isFlipped ? "is-flipped" : ""}`}
-                            onClick={() => setIsFlipped((prev) => !prev)}
-                          >
-                            <div className="flashcard-face flashcard-front">
-                              <h4 className="m-0">{frontText}</h4>
-                            </div>
-                            <div className="flashcard-face flashcard-back">
-                              <h4 className="m-0">{backText}</h4>
-                            </div>
-                          </button>
-
-                          {(currentFlashItem?.note || currentFlashItem?.example) && (
-                            <div className="flashcard-note mt-3 small text-muted">
-                              {currentFlashItem?.note && <div>Note: {currentFlashItem.note}</div>}
-                              {currentFlashItem?.example && <div>Example: {currentFlashItem.example}</div>}
-                            </div>
-                          )}
-
-                          <div className="d-flex justify-content-between mt-3">
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary"
-                              onClick={moveToPrevFlashcard}
-                            >
-                              Trước
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-primary"
-                              onClick={moveToNextFlashcard}
-                            >
-                              Tiếp theo
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {learningMode === "matching" && (
-                        <div className="matching-shell border rounded-3 p-3">
-                          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                            <h6 className="fw-bold m-0">Chế độ ghép thẻ</h6>
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-outline-secondary"
-                              onClick={resetMatchingGame}
-                            >
-                              Chơi lại
-                            </button>
-                          </div>
-
-                          <div className="small text-muted mb-2">
-                            Đã ghép: {matchedMatchingCards.length / 2}/{matchingCards.length / 2}
-                          </div>
-
-                          {matchingCompleted && (
-                            <div className="alert alert-success py-2">
-                              Hoàn thành. Bạn đã ghép đúng tất cả thẻ.
-                            </div>
-                          )}
-
-                          <div className="matching-grid">
-                            {matchingCards
-                              .filter((card) => !matchedMatchingCards.includes(card.id))
-                              .map((card) => {
-                                const isSelected = selectedMatchingCards.includes(card.id);
-                                const cardTypeLabel = card.type === "term" ? "EN" : "VI";
-                                return (
-                                  <button
-                                    key={card.id}
-                                    type="button"
-                                    className={`matching-card ${isSelected ? "is-selected" : ""}`}
-                                    onClick={() => handleMatchingCardClick(card.id)}
-                                    disabled={matchingBusy}
-                                  >
-                                    <span className="matching-tag">{cardTypeLabel}</span>
-                                    <span>{card.text}</span>
-                                  </button>
-                                );
-                              })}
-                          </div>
-                        </div>
-                      )}
-
-                      {learningMode === "quiz" && (
-                        <div className="border rounded-3 p-3 bg-white">
-                          {!currentQuizItem ? (
-                            <p className="text-muted m-0">Khong du du lieu de tao cau hoi.</p>
-                          ) : isQuizComplete ? (
-                            <div className="d-grid gap-3">
-                              <div className="alert alert-info py-3 mb-0">
-                                <h5 className="fw-bold">Hoàn thành bài trắc nghiệm</h5>
-                              </div>
-                              <div className="text-center py-4">
-                                <div className="display-4 fw-bold text-primary mb-2">
-                                  {quizScore}/{quizOrder.length}
-                                </div>
-                                <div className="fs-5 text-muted">
-                                  Bạn trả lời đúng {quizScore} trên {quizOrder.length} câu hỏi
-                                </div>
-                                <div className="text-muted mt-2">
-                                  Tỷ lệ: {Math.round((quizScore / quizOrder.length) * 100)}%
-                                </div>
-                              </div>
-                              <div className="d-flex gap-2 justify-content-center">
-                                <button
-                                  type="button"
-                                  className="btn btn-primary"
-                                  onClick={resetQuizGame}
-                                >
-                                  Làm lại
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-secondary"
-                                  onClick={() => setLearningMode("list")}
-                                >
-                                  Quay lại danh sách
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="d-grid gap-3">
-                              <div className="d-flex justify-content-between align-items-center">
-                                <h6 className="fw-bold m-0">
-                                  Câu hỏi {quizIndex + 1}/{quizOrder.length} - Điểm: {quizScore}
-                                </h6>
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-outline-secondary"
-                                  onClick={resetQuizGame}
-                                >
-                                  Trộn lại bộ câu hỏi
-                                </button>
-                              </div>
-
-                              <div className="quiz-question-box">
-                                <div className="text-muted small">Từ tiếng Anh</div>
-                                <div className="fs-5 fw-semibold">{currentQuizItem.term}</div>
-                              </div>
-
-                              <div className="d-grid gap-2">
-                                {quizOptions.map((option, optionIndex) => {
-                                  const selected = quizSelectedAnswer === option;
-                                  const correct = option === currentQuizItem.meaning;
-                                  let optionClass = "btn-outline-primary";
-
-                                  if (quizSelectedAnswer) {
-                                    if (correct) {
-                                      optionClass = "btn-success";
-                                    } else if (selected) {
-                                      optionClass = "btn-danger";
-                                    } else {
-                                      optionClass = "btn-outline-secondary";
-                                    }
-                                  }
-
-                                  return (
-                                    <button
-                                      key={`${option}-${optionIndex}`}
-                                      type="button"
-                                      className={`btn text-start ${optionClass}`}
-                                      onClick={() => answerQuizQuestion(option)}
-                                      disabled={Boolean(quizSelectedAnswer)}
-                                    >
-                                      {option}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                              {quizFeedback && (
-                                <div className={`alert alert-${quizFeedback.type} py-2 m-0`}>
-                                  {quizFeedback.message}
-                                </div>
-                              )}
-
-                              <div className="d-flex justify-content-end">
-                                <button
-                                  type="button"
-                                  className="btn btn-primary"
-                                  onClick={nextQuizQuestion}
-                                  disabled={!quizSelectedAnswer}
-                                >
-                                  Câu tiếp theo
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      {learningMode === "quiz" && <QuizMode items={items} />}
                     </div>
                   )}
                 </div>

@@ -3,6 +3,7 @@ import { useExam } from "../ExamStaticProvider";
 import { useTime } from "../TimeProvider";
 import { useSession } from "../ExamDynamicProvider";
 import Palete from "../Palete";
+import AiGeneratorModal from "../MyVocabulary/AiGeneratorModal";
 import { createPortal } from "react-dom";
 import fetchData from "../fetch/fetchData";
 const TimeDisplay = React.memo(()=>{
@@ -28,6 +29,8 @@ export default function ExamHeader({}){
     const [saving, setSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [aiProviders, setAiProviders] = useState([]);
+    const [showAiGeneratorModal, setShowAiGeneratorModal] = useState(false);
     const [form, setForm] = useState({
         term: "",
         meaning: "",
@@ -56,17 +59,54 @@ export default function ExamHeader({}){
         }
     };
 
+    const loadAiProviders = async () => {
+        const providers = [];
+        try {
+            const groqConfig = await fetchData("/api/ai-config/groq").catch((err) => {
+                if (err?.message?.includes("404") || err?.message?.includes("Lỗi 404")) return null;
+                throw err;
+            });
+            if (groqConfig) providers.push("groq");
+        } catch (err) {
+            console.log("Error checking Groq config:", err);
+        }
+
+        try {
+            const openrouterConfig = await fetchData("/api/ai-config/openrouter").catch((err) => {
+                if (err?.message?.includes("404") || err?.message?.includes("Lỗi 404")) return null;
+                throw err;
+            });
+            if (openrouterConfig) providers.push("openrouter");
+        } catch (err) {
+            console.log("Error checking OpenRouter config:", err);
+        }
+
+        setAiProviders(providers);
+    };
+
     const openVocabModal = async () => {
         setShowVocabModal(true);
         setErrorMessage("");
         setSuccessMessage("");
         await loadSets();
+        await loadAiProviders();
     };
 
     const closeVocabModal = () => {
         setShowVocabModal(false);
         setErrorMessage("");
         setSuccessMessage("");
+    };
+
+    const handleAiGenerated = (generatedData) => {
+        if (generatedData) {
+            setForm((prev) => ({
+                ...prev,
+                meaning: generatedData.meaning || prev.meaning,
+                note: generatedData.note || prev.note,
+                example: generatedData.example || prev.example,
+            }));
+        }
     };
 
     const handleSaveVocab = async () => {
@@ -155,7 +195,7 @@ export default function ExamHeader({}){
         {showVocabModal && (
             <div
                 className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 11000 }}
+                style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 10000 }}
             >
                 <div className="bg-white rounded-3 p-4" style={{ width: "min(680px, 95vw)" }}>
                     <h5 className="fw-bold mb-3">Lưu từ mới</h5>
@@ -179,6 +219,18 @@ export default function ExamHeader({}){
                             <label className="form-label">Note</label>
                             <input className="form-control" value={form.note} onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))} />
                         </div>
+                        {aiProviders.length > 0 && form.term.trim() && (
+                            <div className="col-12">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-info w-100"
+                                    onClick={() => setShowAiGeneratorModal(true)}
+                                    disabled={saving}
+                                >
+                                    🤖 Tạo Meaning, Note, Example bằng AI
+                                </button>
+                            </div>
+                        )}
                         <div className="col-12">
                             <label className="form-label">Bộ từ đích</label>
                             <select
@@ -217,6 +269,14 @@ export default function ExamHeader({}){
                 </div>
             </div>
         )}
+
+        <AiGeneratorModal
+            show={showAiGeneratorModal}
+            onClose={() => setShowAiGeneratorModal(false)}
+            term={form.term}
+            onGenerated={handleAiGenerated}
+            availableProviders={aiProviders}
+        />
         </>
     )
 }

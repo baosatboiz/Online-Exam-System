@@ -11,9 +11,11 @@ import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetReposi
 import com.example.toeicwebsite.infrastucture.external.dictionary.DictionaryApiClient;
 import com.example.toeicwebsite.infrastucture.external.dictionary.dto.PronunciationData;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UpdateVocabularyItemImpl implements UpdateVocabularyItem {
@@ -41,14 +43,19 @@ public class UpdateVocabularyItemImpl implements UpdateVocabularyItem {
             throw new DomainNotFoundException("Vocabulary item not found in this set");
         }
 
-        PronunciationData pronunciationData = dictionaryApiClient.fetchPronunciation(command.term())
-                .orElse(null);
+        String meaning = command.meaning();
+        String note = command.note();
+        String example = command.example();
+        PronunciationData pronunciationData = null;
+
+        // Fetch pronunciation from Dictionary API
+        pronunciationData = dictionaryApiClient.fetchPronunciation(command.term()).orElse(null);
 
         VocabularyItem updatedItem = currentItem.updateWithPronunciation(
                 command.term(),
-                command.meaning(),
-                command.note(),
-                command.example(),
+                meaning,
+                note,
+                example,
                 pronunciationData != null ? pronunciationData.pronunciation() : null,
                 pronunciationData != null ? pronunciationData.audioUrl() : null
         );

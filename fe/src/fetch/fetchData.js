@@ -16,8 +16,8 @@ export default async function fetchData(endpoint,option={}){
                 ...option
             })
         if(!res.ok){
-            const error = await res.json().catch(()=>{});
-            throw new Error(error.message || `Lỗi ${res.status}`);
+            const error = await res.json().catch(()=> null);
+            throw new Error(error?.message || `Lỗi ${res.status}`);
         }
         if(res.status===204) return {};
         return await res.json().catch(()=>{});

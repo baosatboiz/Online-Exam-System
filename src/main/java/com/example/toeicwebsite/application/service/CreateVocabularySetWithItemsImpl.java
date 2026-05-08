@@ -11,6 +11,7 @@ import com.example.toeicwebsite.domain.vocabulary.repository.VocabularySetReposi
 import com.example.toeicwebsite.infrastucture.external.dictionary.DictionaryApiClient;
 import com.example.toeicwebsite.infrastucture.external.dictionary.dto.PronunciationData;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateVocabularySetWithItemsImpl implements CreateVocabularySetWithItems {
@@ -52,16 +54,21 @@ public class CreateVocabularySetWithItemsImpl implements CreateVocabularySetWith
 
                 seenNormalized.add(normalized);
 
-                PronunciationData pronunciationData = dictionaryApiClient.fetchPronunciation(input.term())
-                        .orElse(null);
+                String meaning = input.meaning();
+                String note = input.note();
+                String example = input.example();
+                PronunciationData pronunciationData = null;
+
+                // Fetch pronunciation from Dictionary API
+                pronunciationData = dictionaryApiClient.fetchPronunciation(input.term()).orElse(null);
 
                 validItems.add(VocabularyItem.createWithPronunciation(
                         set.getVocabularySetId(),
                         command.userId(),
                         input.term(),
-                        input.meaning(),
-                        input.note(),
-                        input.example(),
+                        meaning,
+                        note,
+                        example,
                         pronunciationData != null ? pronunciationData.pronunciation() : null,
                         pronunciationData != null ? pronunciationData.audioUrl() : null
                 ));

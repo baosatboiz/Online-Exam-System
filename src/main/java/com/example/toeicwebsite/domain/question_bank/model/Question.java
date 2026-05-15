@@ -1,9 +1,12 @@
 package com.example.toeicwebsite.domain.question_bank.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 @Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Question {
     private Long questionId;
     private String content;

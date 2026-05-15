@@ -1,8 +1,14 @@
 package com.example.toeicwebsite.domain.exam.model;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class ExamId {
     private UUID id;
 

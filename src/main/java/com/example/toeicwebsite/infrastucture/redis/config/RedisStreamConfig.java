@@ -1,5 +1,6 @@
-package com.example.toeicwebsite.infrastucture.redis;
+package com.example.toeicwebsite.infrastucture.redis.config;
 
+import com.example.toeicwebsite.infrastucture.redis.AnswerStreamConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

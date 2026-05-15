@@ -1,12 +1,15 @@
 package com.example.toeicwebsite.domain.shared;
 
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 @Value
 public class Money {
     BigDecimal amount;

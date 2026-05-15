@@ -7,6 +7,7 @@ import com.example.toeicwebsite.domain.exam.repository.ExamRepository;
 import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamMapper;
+import com.example.toeicwebsite.infrastucture.redis.RedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -37,6 +38,7 @@ public class ExamRepositoryImpl implements ExamRepository {
     }
 
     @Override
+    @RedisCache(key="'exam:'+#id", ttl = 1440)
     public Exam findFullExam(UUID id) {
         return examMapper.toDomain(jpaExamRepository.findFullExam(id));
     }

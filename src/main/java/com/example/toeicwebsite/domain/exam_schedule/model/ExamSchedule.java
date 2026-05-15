@@ -6,12 +6,14 @@ import com.example.toeicwebsite.domain.exam_registration.model.ExamRegistration;
 import com.example.toeicwebsite.domain.exception.BusinessRuleException;
 import com.example.toeicwebsite.domain.shared.Money;
 import com.example.toeicwebsite.domain.user.model.UserId;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class ExamSchedule {
     private ExamScheduleId examScheduleId;

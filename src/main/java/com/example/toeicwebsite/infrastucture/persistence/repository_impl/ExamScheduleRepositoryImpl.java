@@ -8,6 +8,7 @@ import com.example.toeicwebsite.infrastucture.persistence.entity.ExamEntity;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.JpaExamScheduleRepository;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamScheduleMapper;
+import com.example.toeicwebsite.infrastucture.redis.RedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class ExamScheduleRepositoryImpl implements ExamScheduleRepository {
     }
 
     @Override
+    @RedisCache(key = "'examSchedule:'+#page+':'+#mode+':'+#partType",ttl = 1440)
     public List<ExamSchedule> findBySpecification(Integer page, ExamMode mode, PartType partType) {
         Integer partNumber = partType == null ? null : partType.getCode();
         Pageable pageable = page == null ? Pageable.unpaged() : PageRequest.of(page, 10);

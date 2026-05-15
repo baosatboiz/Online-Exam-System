@@ -3,12 +3,14 @@ package com.example.toeicwebsite.domain.exam.model;
 import com.example.toeicwebsite.domain.exam_schedule.model.ExamMode;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Exam {
     private ExamId examId;
     private List<Part> part;

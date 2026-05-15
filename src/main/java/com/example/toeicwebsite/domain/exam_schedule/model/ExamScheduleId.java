@@ -1,7 +1,12 @@
 package com.example.toeicwebsite.domain.exam_schedule.model;
 
-import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class ExamScheduleId {
     private UUID id;
 

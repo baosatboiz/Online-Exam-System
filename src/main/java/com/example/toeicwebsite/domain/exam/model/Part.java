@@ -1,11 +1,14 @@
 package com.example.toeicwebsite.domain.exam.model;
 
 import com.example.toeicwebsite.domain.question_bank.model.QuestionGroup;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Part {
     private PartType partType;
     private List<QuestionGroup> questionGroups;

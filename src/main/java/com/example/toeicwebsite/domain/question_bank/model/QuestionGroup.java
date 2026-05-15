@@ -1,12 +1,15 @@
 package com.example.toeicwebsite.domain.question_bank.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class QuestionGroup {
         private Long id;
         private String audioUrl;

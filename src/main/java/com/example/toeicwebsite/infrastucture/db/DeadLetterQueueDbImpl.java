@@ -20,7 +20,7 @@ public class DeadLetterQueueDbImpl implements FailedAnswerHandler {
     public void pushFailedAnswer(String examAttemptId, Long questionId, ChoiceKey choiceKey) {
         String sql = """
                 INSERT INTO dead_letter_queue (exam_attempt_id, question_id, choice_key)
-                VALUES (?, ?, ?)
+                VALUES (CAST(? AS UUID), ?, ?)
                 ON CONFLICT (exam_attempt_id, question_id)
                 DO UPDATE SET choice_key = EXCLUDED.choice_key
                 """;
@@ -29,7 +29,7 @@ public class DeadLetterQueueDbImpl implements FailedAnswerHandler {
 
     @Override
     public Map<Long, ChoiceKey> getFailedAnswers(String examAttemptId) {
-        String sql = "SELECT question_id, choice_key FROM dead_letter_queue WHERE exam_attempt_id = ?";
+        String sql = "SELECT question_id, choice_key FROM dead_letter_queue WHERE exam_attempt_id = CAST(? AS UUID)";
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, examAttemptId);
 
         Map<Long, ChoiceKey> failedAnswers = new HashMap<>();
@@ -44,7 +44,7 @@ public class DeadLetterQueueDbImpl implements FailedAnswerHandler {
 
     @Override
     public void clearFailedAnswers(String examAttemptId) {
-        String sql = "DELETE FROM dead_letter_queue WHERE exam_attempt_id = ?";
+        String sql = "DELETE FROM dead_letter_queue WHERE exam_attempt_id = CAST(? AS UUID)";
         jdbcTemplate.update(sql, examAttemptId);
     }
 }

@@ -10,6 +10,9 @@ public class StorageAdapter implements StoragePort {
     private String storageUrl;
     @Override
     public String getFileUrl(String path) {
-        return storageUrl+path;
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        return storageUrl + path;
     }
 }

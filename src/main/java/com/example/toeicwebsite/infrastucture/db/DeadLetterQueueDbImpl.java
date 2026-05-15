@@ -1,6 +1,7 @@
 package com.example.toeicwebsite.infrastucture.db;
 
 import com.example.toeicwebsite.domain.FailedAnswerHandler;
+import com.example.toeicwebsite.domain.exam_attempt.model.ExamAttemptId;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,20 +18,20 @@ public class DeadLetterQueueDbImpl implements FailedAnswerHandler {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void pushFailedAnswer(String examAttemptId, Long questionId, ChoiceKey choiceKey) {
+    public void pushFailedAnswer(ExamAttemptId examAttemptId, Long questionId, ChoiceKey choiceKey) {
         String sql = """
                 INSERT INTO dead_letter_queue (exam_attempt_id, question_id, choice_key)
-                VALUES (CAST(? AS UUID), ?, ?)
+                VALUES (?, ?, ?)
                 ON CONFLICT (exam_attempt_id, question_id)
                 DO UPDATE SET choice_key = EXCLUDED.choice_key
                 """;
-        jdbcTemplate.update(sql, examAttemptId, questionId, choiceKey.name());
+        jdbcTemplate.update(sql, examAttemptId.value(), questionId, choiceKey.name());
     }
 
     @Override
-    public Map<Long, ChoiceKey> getFailedAnswers(String examAttemptId) {
-        String sql = "SELECT question_id, choice_key FROM dead_letter_queue WHERE exam_attempt_id = CAST(? AS UUID)";
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, examAttemptId);
+    public Map<Long, ChoiceKey> getFailedAnswers(ExamAttemptId examAttemptId) {
+        String sql = "SELECT question_id, choice_key FROM dead_letter_queue WHERE exam_attempt_id = ?";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, examAttemptId.value());
 
         Map<Long, ChoiceKey> failedAnswers = new HashMap<>();
         for (Map<String, Object> row : rows) {
@@ -43,8 +44,8 @@ public class DeadLetterQueueDbImpl implements FailedAnswerHandler {
     }
 
     @Override
-    public void clearFailedAnswers(String examAttemptId) {
-        String sql = "DELETE FROM dead_letter_queue WHERE exam_attempt_id = CAST(? AS UUID)";
-        jdbcTemplate.update(sql, examAttemptId);
+    public void clearFailedAnswers(ExamAttemptId examAttemptId) {
+        String sql = "DELETE FROM dead_letter_queue WHERE exam_attempt_id = ?";
+        jdbcTemplate.update(sql, examAttemptId.value());
     }
 }

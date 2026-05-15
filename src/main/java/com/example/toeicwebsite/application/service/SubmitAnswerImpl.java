@@ -39,7 +39,7 @@ public class SubmitAnswerImpl implements SubmitAnswer {
                 pendingAnswerPort.savePendingAnswer(command.examAttemptId(), command.questionId(), command.choiceKey());
             } catch (Exception e) {
                 log.error("Redis write failed: {}. Pushing to Dead Letter Queue.", e.getMessage());
-                failedAnswerHandler.pushFailedAnswer(command.examAttemptId().value().toString(), command.questionId(), command.choiceKey());
+                failedAnswerHandler.pushFailedAnswer(command.examAttemptId(), command.questionId(), command.choiceKey());
             }
         });
 

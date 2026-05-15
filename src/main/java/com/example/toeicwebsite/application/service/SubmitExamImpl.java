@@ -53,11 +53,10 @@ public class SubmitExamImpl implements SubmitExam {
         }
 
         // Process Dead Letter Queue and merge, then clear it
-        String attemptIdStr = command.examAttemptId().value().toString();
-        Map<Long, ChoiceKey> dlqAnswers = failedAnswerHandler.getFailedAnswers(attemptIdStr);
+        Map<Long, ChoiceKey> dlqAnswers = failedAnswerHandler.getFailedAnswers(command.examAttemptId());
         dlqAnswers.forEach(pendingAnswers::putIfAbsent);
         if (!dlqAnswers.isEmpty()) {
-            failedAnswerHandler.clearFailedAnswers(attemptIdStr);
+            failedAnswerHandler.clearFailedAnswers(command.examAttemptId());
         }
 
         // Merge answers from Redis and Dead Letter Queue into the attempt

@@ -7,11 +7,13 @@ export default function MediaContent({data}){
         <span>Loading</span>
     </div>)
     const normalize = ()=>{
-        if(data.imageUrl.startsWith('[')){
-            return JSON.parse(data.imageUrl);
+        const raw = data.imageUrl;
+        const bracket = raw.indexOf('[');
+        if(bracket==-1) return [data.imageUrl];
+        const baseUrl = raw.substring(0,bracket);
+        const listImageJson = JSON.parse(raw.substring(bracket));
+        return listImageJson.map(i=>baseUrl+i);
         }
-        return [data.imageUrl];
-    }
     return (
         <div className="custom-scroll overflow-auto h-100 shadow-sm">
         <div className="">

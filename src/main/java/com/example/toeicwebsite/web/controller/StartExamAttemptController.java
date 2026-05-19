@@ -26,6 +26,7 @@ import com.example.toeicwebsite.web.mapper.submit_answer.SubmitAnswerMapper;
 import com.example.toeicwebsite.web.mapper.submit_exam.SubmitExamMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/exam-attempts")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class StartExamAttemptController {
     private final StartExamAttempt startExamAttempt;
     private final GetAttemptQuestions getAttemptQuestions;

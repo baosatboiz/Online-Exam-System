@@ -12,6 +12,7 @@ import com.example.toeicwebsite.web.dto.exam.RegisterExamResponse;
 import com.example.toeicwebsite.web.mapper.register_exam.ExamRegistrationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/exam-registration")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class ExamRegistrationController {
     private final RegisterExam registerExam;
     private final GetPaymentInfo getPaymentInfo;

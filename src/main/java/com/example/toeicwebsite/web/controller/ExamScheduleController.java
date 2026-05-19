@@ -19,6 +19,7 @@ import com.example.toeicwebsite.web.mapper.schedule_mapper.GetScheduleMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class ExamScheduleController {
     private final CreateScheduleMapper createScheduleMapper;
     private final DeleteSchedule deleteSchedule;
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<GetScheduleResponse>>  getExamSchedules(GetScheduleRequest request,
                                                                        @AuthenticationPrincipal SecurityUser securityUser){
         UserId userId= securityUser.getUser().getUserId();
@@ -43,12 +45,14 @@ public class ExamScheduleController {
         return ResponseEntity.ok(response);
         }
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CreateScheduleResponse> createExamSchedule(@RequestBody @Valid CreateScheduleRequest request){
         CreateScheduleCommand command = createScheduleMapper.toCommand(request);
         return ResponseEntity.ok(new CreateScheduleResponse(createSchedule.execute(command).examScheduleId().value()));
 
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteExamSchedule(@PathVariable UUID id) {
         DeleteScheduleCommand command = new DeleteScheduleCommand(new ExamScheduleId(id));
 

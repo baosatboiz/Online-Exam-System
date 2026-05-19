@@ -23,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
     @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
@@ -37,7 +38,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**","/health").permitAll()
+                        .requestMatchers("/login","/register","/error","/oauth2/**", "/login/oauth2/**","/health","/payment/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e->{
                     e.authenticationEntryPoint((request,response,authException)->{

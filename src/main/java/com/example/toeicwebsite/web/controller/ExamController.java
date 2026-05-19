@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,10 +32,12 @@ public class ExamController {
 //        examService.createExam(request);
 //    }
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<GetExamReponse>> getExams(){
         return ResponseEntity.ok(getExam.handle().stream().map(getExamMapper::toResponse).toList());
     }
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CreateExamResponse> createExam(@RequestBody ExamRequest examRequest){
         CreateExamCommand command = createExamWebMapper.toCommand(examRequest);
         CreateExamResult result = createExam.execute(command);

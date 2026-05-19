@@ -6,6 +6,7 @@ import com.example.toeicwebsite.domain.shared.Money;
 import com.example.toeicwebsite.web.dto.payment.SepayWebhookRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class PaymentWebhookController {
 
     private final ProcessPayment processPayment;
 
-    @org.springframework.beans.factory.annotation.Value("${payment.sepay.webhook-token}")
+    @Value("${payment.sepay.webhook-token}")
     private String webhookToken;
 
     @PostMapping("/webhook/sepay")

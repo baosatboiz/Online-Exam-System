@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +51,7 @@ public class AuthController {
             return ResponseEntity.ok(mapper.toResponse(register.handle(mapper.toCommand(request))));
     }
     @GetMapping("/me")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal SecurityUser user){
        GetMyProfileResponse response = mapper.toResponse(getMyProfile.execute(new GetMyProfileQuery(user.getUsername())));
        response.setPicture(user.getPicture());

@@ -8,6 +8,7 @@ import java.util.List;
 public record GetAttemptQuestionsResponse(
         String title,
         Integer durationMinutes,
+        Integer remainingTimeSeconds,
         List<PartResponse> parts
 ) {
     public record PartResponse(

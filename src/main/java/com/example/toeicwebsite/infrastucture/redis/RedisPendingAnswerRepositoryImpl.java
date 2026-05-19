@@ -31,10 +31,8 @@ public class RedisPendingAnswerRepositoryImpl implements ExamAttemptPendingAnswe
     @Override
     public void savePendingAnswer(ExamAttemptId examAttemptId, Long questionId, ChoiceKey choiceKey) {
         String hashKey = getHashKey(examAttemptId);
-        // Save to Redis Hash for fast retrieval
         stringRedisTemplate.opsForHash().put(hashKey, String.valueOf(questionId), choiceKey.name());
 
-        // Push to Redis Stream for async processing
         Map<String, String> eventMap = Map.of(
                 "attemptId", examAttemptId.value().toString(),
                 "questionId", questionId.toString(),
@@ -58,7 +56,6 @@ public class RedisPendingAnswerRepositoryImpl implements ExamAttemptPendingAnswe
             pendingAnswers.put(questionId, choiceKey);
         }
 
-        // Delete the hash as it's no longer needed
         stringRedisTemplate.delete(hashKey);
         
         return pendingAnswers;

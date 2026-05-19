@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import com.example.toeicwebsite.application.port.ExamTimeoutSchedulerPort;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class StartExamAttemptImpl implements StartExamAttempt {
     private final UserRepository userRepository;
     private final ExamRegistrationRepository examRegistrationRepository;
     private final StartExamAttemptResultMapper startExamAttemptResultMapper;
+    private final ExamTimeoutSchedulerPort examTimeoutSchedulerPort;
 
     @Override
     public StartExamAttemptResult execute(StartExamAttemptCommand command) {
@@ -56,6 +58,9 @@ public class StartExamAttemptImpl implements StartExamAttempt {
                 registration
         );
         ExamAttempt saved = examAttemptRepository.save(examAttempt, command.userId().value());
+        
+        examTimeoutSchedulerPort.scheduleTimeout(saved.getId(), duration + 1);
+        
         return startExamAttemptResultMapper.from(saved);
     }
 }

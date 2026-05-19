@@ -14,6 +14,7 @@ import java.util.List;
 public class GetAttemptQuestionsResult {
     private String title;
     private int duration;
+    private Integer remainingTimeSeconds;
     private List<PartResult> parts;
 
     @Data

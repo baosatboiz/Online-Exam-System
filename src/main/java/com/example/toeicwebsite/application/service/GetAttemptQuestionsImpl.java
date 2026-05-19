@@ -39,6 +39,9 @@ public class GetAttemptQuestionsImpl implements GetAttemptQuestions {
 
         UUID examId = examSchedule.getExamId().value();
         Exam exam = examRepository.findFullExam(examId);
-        return mapper.toGetAttemptQuestionsResult(exam);
+        GetAttemptQuestionsResult result = mapper.toGetAttemptQuestionsResult(exam);
+        int remaining = (int) java.time.Duration.between(Instant.now(), examAttempt.getMustFinishedAt()).getSeconds();
+        result.setRemainingTimeSeconds(Math.max(0, remaining));
+        return result;
     }
 }

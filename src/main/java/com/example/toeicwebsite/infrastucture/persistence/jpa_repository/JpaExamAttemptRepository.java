@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,4 +50,11 @@ public interface JpaExamAttemptRepository extends JpaRepository<ExamAttemptEntit
         WHERE ea.status = com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus.IN_PROGRESS
     """)
     List<ExamAttemptEntity> findAllInProgress();
+
+    @Query("""
+        SELECT ea FROM ExamAttemptEntity ea
+        WHERE ea.status = com.example.toeicwebsite.domain.exam_attempt.model.ExamStatus.IN_PROGRESS
+        AND ea.mustFinishedAt < :cutoff
+    """)
+    List<ExamAttemptEntity> findExpiredAttempts(@Param("cutoff") LocalDateTime cutoff);
 }

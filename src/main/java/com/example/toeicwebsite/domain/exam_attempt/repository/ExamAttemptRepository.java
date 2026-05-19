@@ -7,6 +7,7 @@ import com.example.toeicwebsite.domain.exam_schedule.model.ExamScheduleId;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +19,9 @@ public interface ExamAttemptRepository {
     Optional<ExamAttempt> findByBusinessId(UUID businessId);
     Optional<ExamAttempt> findByBusinessIdMinimal(UUID businessId);
     void saveAnsweredQuestion(ExamAttemptId attemptId, Long questionId, ChoiceKey choiceKey);
+    void saveAnsweredQuestions(ExamAttemptId attemptId, Map<Long, ChoiceKey> answers);
     Map<ExamScheduleId,Long> countTotalAttemptsIn(List<ExamScheduleId> ids);
     Map<ExamScheduleId, ExamStatus> findByUserIdAndScheduleIdsIn(UUID userId, List<ExamScheduleId> ids);
     List<ExamAttempt> findInProgressAttempts();
+    List<ExamAttempt> findExpiredAttempts(Instant cutoff);
 }

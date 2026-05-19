@@ -9,6 +9,7 @@ import com.example.toeicwebsite.domain.exception.DomainNotFoundException;
 import com.example.toeicwebsite.domain.question_bank.model.ChoiceKey;
 import com.example.toeicwebsite.domain.question_bank.model.Question;
 import com.example.toeicwebsite.infrastucture.persistence.entity.*;
+import com.example.toeicwebsite.infrastucture.persistence.jdbc_repository.ExamAttemptAnswerJdbcRepository;
 import com.example.toeicwebsite.infrastucture.persistence.jpa_repository.*;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityMapper;
 import com.example.toeicwebsite.infrastucture.persistence.mapper.ExamAttemptEntityUpdateMapper;
@@ -18,6 +19,9 @@ import com.example.toeicwebsite.infrastucture.persistence.projection.TotalAttemt
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +41,7 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     private final ExamAttemptMinimalMapper examAttemptMinimalMapper;
     private final ExamAttemptEntityUpdateMapper examAttemptEntityUpdateMapper;
     private final JpaQuestionRepository jpaQuestionRepository;
+    private final ExamAttemptAnswerJdbcRepository examAttemptAnswerJdbcRepository;
 
     @Override
     public ExamAttempt save(ExamAttempt examAttempt, UUID userId) {
@@ -78,6 +83,18 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     }
 
     @Override
+    public void saveAnsweredQuestions(ExamAttemptId examAttemptId, Map<Long, ChoiceKey> answers) {
+        if (answers == null || answers.isEmpty()) return;
+        ExamAttemptEntity examAttemptEntity = jpaExamAttemptRepository.findByBusinessId(examAttemptId.value())
+                .orElseThrow(() -> new DomainNotFoundException("Exam Attempt not found"));
+        
+        Map<Long, String> stringAnswers = answers.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+                
+        examAttemptAnswerJdbcRepository.batchUpsertAnswers(examAttemptEntity.getId(), stringAnswers);
+    }
+
+    @Override
     public Map<ExamScheduleId, Long> countTotalAttemptsIn(List<ExamScheduleId> ids) {
         List<UUID> scheduleIds = ids.stream().map(ExamScheduleId::value).toList();
         return jpaExamAttemptRepository.countTotalAttemptsIn(scheduleIds)
@@ -99,6 +116,15 @@ public class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
     @Override
     public List<ExamAttempt> findInProgressAttempts() {
         return jpaExamAttemptRepository.findAllInProgress()
+                .stream()
+                .map(examAttemptMinimalMapper::toDomainMinimal)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ExamAttempt> findExpiredAttempts(Instant cutoff) {
+        LocalDateTime localCutoff = LocalDateTime.ofInstant(cutoff, ZoneId.systemDefault());
+        return jpaExamAttemptRepository.findExpiredAttempts(localCutoff)
                 .stream()
                 .map(examAttemptMinimalMapper::toDomainMinimal)
                 .collect(Collectors.toList());

@@ -49,9 +49,11 @@ public class GetPartQuestionsImpl implements GetPartQuestions {
         Part part = new Part(PartType.fromCode(query.partNumber()), questionGroups);
 
         GetAttemptQuestionsResult.PartResult partResult = mapper.toPartResult(part);
+        int remaining = (int) java.time.Duration.between(Instant.now(), examAttempt.getMustFinishedAt()).getSeconds();
         return new GetAttemptQuestionsResult(
             exam.getTitle(),
             exam.getDuration(),
+            Math.max(0, remaining),
             Collections.singletonList(partResult)
         );
     }

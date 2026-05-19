@@ -23,6 +23,9 @@ public class ExamAttemptEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     @Column(name = "business_id", nullable = false, unique = true)
     private UUID businessId;
 
